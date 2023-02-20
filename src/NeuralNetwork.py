@@ -76,13 +76,32 @@ class Layer:
             self.perceptrons.append(Perceptron(input_length,init_weight,activation_function))
             
     def feed_forward(self,input):
-        result = np.ndarray((len(self.perceptrons),len(input)))
+        result = np.ndarray((len(input),len(self.perceptrons)))
         for x in range(len(self.perceptrons)):
             for y in range(len(input)):
-                result[x][y]=self.perceptrons[x].activate(input[y],self.activation_function)
+                result[y][x]=self.perceptrons[x].activate(input[y],self.activation_function)
+    
+    def num_perceptrons: 
+        return len(self.perceptrons) 
         
 
 class ANN:
-    def __init__(self):
+    def __init__(self, layers):
+        self.layers=[]
+        for x in range(len(layers)):
+            self.layers.append(layers[x])
+            
+    def predict(self, input):
+        result = input
+        for x in range(len(input)):
+            for y in range(len(self.layers)):
+                result=self.layers[y].feed_forward(result)
+        return result
+    
+    def back_propagation(self):
         pass
+        
+                    
+        
+        
     
