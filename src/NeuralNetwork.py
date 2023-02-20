@@ -68,6 +68,18 @@ class Perceptron:
         self.bias=self.bias+learning_rate*loss  
         return
         
+class Layer:
+    def __init__(self, activation_function, node_number, input_length, init_weight):
+        self.activation_function=activation_function
+        self.perceptrons = []
+        for x in range(node_number):
+            self.perceptrons.append(Perceptron(input_length,init_weight,activation_function))
+            
+    def feed_forward(self,input):
+        result = np.ndarray((len(self.perceptrons),len(input)))
+        for x in range(len(self.perceptrons)):
+            for y in range(len(input)):
+                result[x][y]=self.perceptrons[x].activate(input[y],self.activation_function)
         
 
 class ANN:
