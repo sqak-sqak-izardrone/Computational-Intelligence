@@ -19,6 +19,10 @@ class Perceptron:
         self.weights=init_weight[0:len(features)]
         self.bias=init_weight[len(features)]
         self.activation_function=activation_function
+        self.acti_value=0
+        self.z_value=0
+        self.gradient=np.ndarray(features+1)
+        
         
         
     # a step function
@@ -33,30 +37,26 @@ class Perceptron:
     # depends on the activation function type of the perceptron 
     # currently, sigmoid and tanh is provided
     def activate(self,s):
-        rt = np.ndarray(len(s))
-        for x in range(len(s)):
-            if(self.activation_function=="sigmoid"):
-                rt[x]=sigmoid(s)
-            else if(self.activation_function=="tanh"):
-                rt[x]=tanh(s)
-            else:
-                raise ValueError("No such activation function!")
-        return rt
+        if(self.activation_function=="sigmoid"):
+            self.value=sigmoid(s)
+            return sigmoid(s)
+        else if(self.activation_function=="tanh"):
+            self.value=tanh(s)
+            return tanh(s)
+        else:
+            raise ValueError("No such activation function!")
             
     
     # the general activation function's derivative, it switches to different concreate activation function derivatives
     # depends on the activation function type of the perceptron 
     # currently, sigmoid and tanh is provided
-    def activation_deriv(self.s):
-        rt = np.ndarray(len(s))
-        for x in range(len(s)):
-            if(self.activation_function=="sigmoid"):
-                rt[x]=sigmoid_deriv(s)
-            else if(self.activation_function=="tanh"):
-                rt[x]=tanh_deriv(s)
-            else:
-                raise ValueError("No such activation function!")
-        return rt
+    def activation_deriv(self,s):
+        if(self.activation_function=="sigmoid"):
+            return sigmoid_deriv(s)
+        else if(self.activation_function=="tanh"):
+            return tanh_deriv(s)
+        else:
+            raise ValueError("No such activation function!")
      
     # sigmoid function and its derivative    
     def sigmoid(s):
@@ -70,17 +70,19 @@ class Perceptron:
     def tanh_deriv(s):
         return (np.exp(s)-np.exp(-s))/2*(np.exp(s)-np.exp(-s))/2
     
+    # return the activation value for the given input
     def feed_forward(self, input):
-        sum  = np.ndarray(len(input))
-        for x in range(len(input)):
-            sum[x]=np.dot(input[x],self.weights)+self.bias
-        return activate(sum)        
-        
+        self.z_value=np.dot(input,self.weights)+self.bias
+        return activate(self.z_value)        
+     
+    # the feed forward for step function activation
+    # only used for logic gate case
     def simple_feed_forward(self,input):
         sum=np.dot(input,self.weights)+self.bias
         return step(sum)
     
-    #update weight
+    # update weight
+    # the backward calculation for one perceptron logical gates
     def simple_back_propagation(self,input,labels,learning_rate):        
         for x in range(len(input)):
             result[x]=feed_forward(input[x])
@@ -90,38 +92,112 @@ class Perceptron:
         return
         
 class Layer:
-    def __init__(self, activation_function, node_number, input_length, init_weight):
+    # this class defines one layer (either hidden or output layer) of the ANN
+    # storing the list of perceptrons inside this layer
+    
+    # construct the layer
+    # specify the activation function , number of perceptrons, input feature number and initial weight for each perceptron
+    # we give all perceptron the same initial weights
+    def __init__(self, activation_function, perceptron_number, input_length, init_weight):
+        self.input_length=input_length
+        self.perceptron_number=perceptron_number
         self.activation_function=activation_function
+        self.activation_values=np.ndarray(perceptron_number)
         self.perceptrons = []
-        for x in range(node_number):
+        for x in range(perceptrons_number):
             self.perceptrons.append(Perceptron(input_length,init_weight,activation_function))
             
+    # feed forward for this layer
+    # gather the feed forward results from each perceptron of this layer and 
+    # return the results combined in an array of length len(self.perceptrons)
     def feed_forward(self,input):
-        result = np.ndarray((len(input),len(self.perceptrons)))
+        result = np.ndarray(len(self.perceptrons))
         for x in range(len(self.perceptrons)):
-            for y in range(len(input)):
-                result[y][x]=self.perceptrons[x].activate(input[y],self.activation_function)
+            self.activation_values[x]=self.perceptrons[x].activate(input)
+            result[x]=self.activation_values[x]
+            
+    # this takes in 
+    # 1. the partial derivative of the loss function L with respect to the activation value of the forward layer
+    # 2. the forward layer, essentially z_value and weights of its perceptrons
+    # 3. the backward layer, essentially activation value of its perceptrons
+    # it updates all the gradients of the perceptron weights for this layer
+    # returns the partial derivative of the loss function L with respect to the activation value of the current layer
+    def back_propagation(self,forward_partial,forward_layer,backward_layer_activation):
+        partial=np.ndarray(len(self.perceptrons))
+        for x in range(len(self.perceptrons)):
+            sum=0
+            for y in range(len(forward_partial)):
+                subsum1=forward_partial[y]
+                subsum2=forward_layer.perceptrons[y].activation_deriv(forward_layer.perceptrons[y].z_value)
+                subsum3=forward_layer.perceptrons[y].weights[x]
+                sum+=subsum1*subsum2*subsum3
+            partial[x]=sum
+            subsum1=partial[x]
+            subsum2=self.perceptrons[x].activation_deriv(self.perceptrons[x].z_value)
+            for y in range(self.input_length):
+                subsum3=backward_layer_activation[y]
+                self.perceptrons[x].gradient[y]=subsum1*subsum2*subsum3
+            # the bias
+            self.perceptrons[x].gradient[self.input_length]=subsum1*subsum2
+        return partial
+     
     
-    def num_perceptrons: 
-        return len(self.perceptrons) 
         
 
 class ANN:
+    # ANN artificial neural network model, initialize the model with a list of layers
     def __init__(self, layers):
+        self.layer_number=len(layers)
         self.layers=[]
         for x in range(len(layers)):
             self.layers.append(layers[x])
-            
+    
+    # predict the result from the current model, the prediction arise from iterating feed forward from each layer
     def predict(self, input):
         result = input
-        for x in range(len(input)):
-            for y in range(len(self.layers)):
-                result=self.layers[y].feed_forward(result)
+        for x in range(len(self.layers)):
+            result=self.layers[x].feed_forward(result) # the result of the previous layer(or initial input) serves as the input for the curren layer
         return result
     
-    def back_propagation(self):
-        pass
+    # back propagation for one sample
+    # update the gradients in each perceptron
+    def back_propagation(self, loss_function_deriv, input, target):
+        partial=np.ndarray(self.layer_number)
+        result=predict(input)
+        for x in range(len(target)):
+            partial[x]=loss_function_deriv(result,target)
+            subsum1=partial[x]
+            subsum2=self.layers[len(self.layers)-1].perceptrons[x].activation_deriv(self.layers[len(self.layers)-1].perceptrons[x].z_value)
+            for y in range(self.input_length):
+                subsum3=self.layers[len(self.layers)-2].perceptrons[y].acti_value
+                self.layers[len(self.layers)-1].perceptrons[x].gradient[y]=subsum1*subsum2*subsum3
+            # the bias
+            self.layers[len(self.layers)-1].perceptrons[x].gradient[self.input_length]=subsum1*subsum2
+        for x in reversed(range(1,len(self.layers)-1)):
+            partial=self.layers[x].back_propagation(partial,self.layers[x+1],self.layers[x-1].activation_values)
+        # for the first layer the "backward layer activation value" is just the input
+        self.layers[0].back_propagation(partial,self.layers[1],input)
         
+    
+    # back propagation for a batch of records
+    # the gradient for a batch of records is the average of the gradients for each record
+    # update the gradients in each perceptron
+    def back_propagation_batch(self,inputs):
+        pass
+    
+    def gradient_decent(self,learning_rate)
+        for x in range(self.layer_number):
+            for y in range(self.layers[x].perceptron_number):
+                for z in range(self.layers[x].input_length+1):
+                    self.layers[x].perceptrons[y].weights[z]-=learning_rate*self.layers[x].perceptrons[y].gradient[z]
+                    
+    def train(inputs, targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
+        #do:
+        #batch the inputs into different batches
+        #back propagates on these batches to get the gradients
+        #perform gradient decent
+        #while(loss_function>threshold)
+        pass
                     
         
         
