@@ -3,47 +3,68 @@
 
 
 
+
 class Perceptron:
+    # this class defines a single perceptron, 
+    # this include two method for the simple perceptron for the logic gate with step function as activation
+    # and general perceptron equipped with a certain activation function
+    
+    
+    # the perceptron is initialized with 
+    # 1. its number of input features
+    # 2. its initial weight , an array of length features+1 with the last term as bias
+    # 3. its activation function, a string
     def __init__(self, features, init_weight, activation_function="sigmoid"):
         self.features=features
         self.weights=init_weight[0:len(features)]
         self.bias=init_weight[len(features)]
         self.activation_function=activation_function
         
+        
+    # a step function
     def step(s):
         if(s>0):
             return 1;
         else:
             return 0
-        
-    def activate(s,activation_function):
+     
+    
+    # the general activation function, it switches to different concreate activation function 
+    # depends on the activation function type of the perceptron 
+    # currently, sigmoid and tanh is provided
+    def activate(self,s):
         rt = np.ndarray(len(s))
         for x in range(len(s)):
-            if(activation_function=="sigmoid"):
+            if(self.activation_function=="sigmoid"):
                 rt[x]=sigmoid(s)
-            else if(activation_function=="tanh"):
+            else if(self.activation_function=="tanh"):
                 rt[x]=tanh(s)
             else:
                 raise ValueError("No such activation function!")
         return rt
             
-            
-    def activation_deriv(s,activation_function):
+    
+    # the general activation function's derivative, it switches to different concreate activation function derivatives
+    # depends on the activation function type of the perceptron 
+    # currently, sigmoid and tanh is provided
+    def activation_deriv(self.s):
         rt = np.ndarray(len(s))
         for x in range(len(s)):
-            if(activation_function=="sigmoid"):
+            if(self.activation_function=="sigmoid"):
                 rt[x]=sigmoid_deriv(s)
-            else if(activation_function=="tanh"):
+            else if(self.activation_function=="tanh"):
                 rt[x]=tanh_deriv(s)
             else:
                 raise ValueError("No such activation function!")
         return rt
-            
+     
+    # sigmoid function and its derivative    
     def sigmoid(s):
         return 1/(1+np.exp(-s))
     def sigmoid_deriv(s):
         return  sigmoid(s)*(1-sigmoid(s))
     
+    #tanh function and its derivative
     def tanh(s):
         return (np.exp(s)-np.exp(-s))/(np.exp(s)+np.exp(-s))
     def tanh_deriv(s):
@@ -53,7 +74,7 @@ class Perceptron:
         sum  = np.ndarray(len(input))
         for x in range(len(input)):
             sum[x]=np.dot(input[x],self.weights)+self.bias
-        return activate(sum,self.activation_function)        
+        return activate(sum)        
         
     def simple_feed_forward(self,input):
         sum=np.dot(input,self.weights)+self.bias
