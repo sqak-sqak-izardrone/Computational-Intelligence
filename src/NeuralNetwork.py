@@ -1,7 +1,7 @@
 # Note: you are free to organize your code in the way you find most convenient.
 # However, make sure that when your main notebook is run, it executes the steps indicated in the assignment.
 
-
+import numpy as np
 
 
 class Perceptron:
@@ -28,7 +28,7 @@ class Perceptron:
     # a step function
     def step(s):
         if(s>0):
-            return 1;
+            return 1
         else:
             return 0
      
@@ -38,11 +38,11 @@ class Perceptron:
     # currently, sigmoid and tanh is provided
     def activate(self,s):
         if(self.activation_function=="sigmoid"):
-            self.value=sigmoid(s)
-            return sigmoid(s)
-        else if(self.activation_function=="tanh"):
-            self.value=tanh(s)
-            return tanh(s)
+            self.value= self.sigmoid(s)
+            return self.sigmoid(s)
+        elif(self.activation_function=="tanh"):
+            self.value = self.tanh(s)
+            return self.tanh(s)
         else:
             raise ValueError("No such activation function!")
             
@@ -52,17 +52,17 @@ class Perceptron:
     # currently, sigmoid and tanh is provided
     def activation_deriv(self,s):
         if(self.activation_function=="sigmoid"):
-            return sigmoid_deriv(s)
-        else if(self.activation_function=="tanh"):
-            return tanh_deriv(s)
+            return self.sigmoid_deriv(s)
+        elif(self.activation_function=="tanh"):
+            return self.tanh_deriv(s)
         else:
             raise ValueError("No such activation function!")
      
     # sigmoid function and its derivative    
     def sigmoid(s):
-        return 1/(1+np.exp(-s))
-    def sigmoid_deriv(s):
-        return  sigmoid(s)*(1-sigmoid(s))
+        return 1/(1 + np.exp(-s))
+    def sigmoid_deriv(self, s):
+        return  self.sigmoid(s)*(1-self.sigmoid(s))
     
     #tanh function and its derivative
     def tanh(s):
@@ -73,20 +73,21 @@ class Perceptron:
     # return the activation value for the given input
     def feed_forward(self, input):
         self.z_value=np.dot(input,self.weights)+self.bias
-        return activate(self.z_value)        
+        return self.activate(self.z_value)        
      
     # the feed forward for step function activation
     # only used for logic gate case
     def simple_feed_forward(self,input):
         sum=np.dot(input,self.weights)+self.bias
-        return step(sum)
+        return self.step(sum)
     
     # update weight
     # the backward calculation for one perceptron logical gates
-    def simple_back_propagation(self,input,labels,learning_rate):        
+    def simple_back_propagation(self,input,labels,learning_rate):  
+        result = []      
         for x in range(len(input)):
-            result[x]=feed_forward(input[x])
-        loss=np.sum(labels-result)
+            result[x] = self.feed_forward(input[x])
+        loss=np.sum(np.subtract(labels - result))
         self.weights=self.weights+learning_rate*input*loss
         self.bias=self.bias+learning_rate*loss  
         return
@@ -104,7 +105,7 @@ class Layer:
         self.activation_function=activation_function
         self.activation_values=np.ndarray(perceptron_number)
         self.perceptrons = []
-        for x in range(perceptrons_number):
+        for x in range(perceptron_number):
             self.perceptrons.append(Perceptron(input_length,init_weight,activation_function))
             
     # feed forward for this layer
@@ -163,7 +164,7 @@ class ANN:
     # update the gradients in each perceptron
     def back_propagation(self, loss_function_deriv, input, target):
         partial=np.ndarray(self.layer_number)
-        result=predict(input)
+        result = self.predict(input)
         for x in range(len(target)):
             partial[x]=loss_function_deriv(result,target)
             subsum1=partial[x]
