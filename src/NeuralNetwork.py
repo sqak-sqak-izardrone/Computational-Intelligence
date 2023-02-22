@@ -19,7 +19,6 @@ class Perceptron:
         self.weights=init_weight[0:features]
         self.bias=init_weight[features]
         self.activation_function=activation_function
-        self.acti_value=0
         self.z_value=0
         self.gradient=np.ndarray(features+1)
         self.batch_gradient=np.ndarray(features+1)
@@ -27,7 +26,7 @@ class Perceptron:
         
         
     # a step function
-    def step(s):
+    def step(self,s):
         if(s>0):
             return 1
         else:
@@ -39,10 +38,8 @@ class Perceptron:
     # currently, sigmoid and tanh is provided
     def activate(self,s):
         if(self.activation_function=="sigmoid"):
-            self.value= self.sigmoid(s)
             return self.sigmoid(s)
         elif(self.activation_function=="tanh"):
-            self.value = self.tanh(s)
             return self.tanh(s)
         else:
             raise ValueError("No such activation function!")
@@ -80,6 +77,7 @@ class Perceptron:
     # only used for logic gate case
     def simple_feed_forward(self,input):
         sum=np.dot(input,self.weights)+self.bias
+        print(sum)
         return self.step(sum)
     
     # update weight
@@ -117,6 +115,7 @@ class Layer:
         for x in range(len(self.perceptrons)):
             self.activation_values[x]=self.perceptrons[x].activate(input)
             result[x]=self.activation_values[x]
+        return result
             
     # this takes in 
     # 1. the partial derivative of the loss function L with respect to the activation value of the forward layer
@@ -134,6 +133,8 @@ class Layer:
                 subsum3=forward_layer.perceptrons[y].weights[x]
                 sum+=subsum1*subsum2*subsum3
             partial[x]=sum
+
+
             subsum1=partial[x]
             subsum2=self.perceptrons[x].activation_deriv(self.perceptrons[x].z_value)
             for y in range(self.input_length):
@@ -205,19 +206,33 @@ class ANN:
                     self.layers[x].perceptrons[y].batch_gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]/input_length
                     self.layers[x].perceptrons[y].gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]
     
-    def gradient_decent(self,learning_rate):
+    def gradient_decent(self,learning_rate,threshold):
         for x in range(self.layer_number):
             for y in range(self.layers[x].perceptron_number):
                 for z in range(self.layers[x].input_length+1):
-                    self.layers[x].perceptrons[y].weights[z]-=learning_rate*self.layers[x].perceptrons[y].gradient[z]
+                    if self.layers[x].perceptrons[y].gradient[z]>threshold:
+                        self.layers[x].perceptrons[y].weights[z]-=learning_rate*self.layers[x].perceptrons[y].gradient[z]
+                    else:
+                        return True
+        return False
                     
-    def train(inputs, targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
+    def train(self, inputs, targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
         #do:
         #batch the inputs into different batches
         #back propagates on these batches to get the gradients
         #perform gradient decent
-        #while(loss_function>threshold)
-        pass
+        #while(gradient>threshold)
+        converging=False
+        while not converging:
+            for x in range(inputs):
+                self.back_propagation(loss_function_deriv,inputs[x],targets[x])
+                converging=self.gradient_decent(learning_rate) or converging
+                if converging:
+                    break
+                
+            
+        
+        
                     
         
         
