@@ -66,7 +66,7 @@ class Perceptron:
     def tanh(self,s):
         return (np.exp(s)-np.exp(-s))/(np.exp(s)+np.exp(-s))
     def tanh_deriv(self,s):
-        return (np.exp(s)-np.exp(-s))/2*(np.exp(s)-np.exp(-s))/2
+        return 1-self.tanh(s)*self.tanh(s)
     
     # return the activation value for the given input
     def feed_forward(self, input):
@@ -113,7 +113,7 @@ class Layer:
     def feed_forward(self,input):
         result = np.ndarray(len(self.perceptrons))
         for x in range(len(self.perceptrons)):
-            self.activation_values[x]=self.perceptrons[x].activate(input)
+            self.activation_values[x]=self.perceptrons[x].feed_forward(input)
             result[x]=self.activation_values[x]
         return result
             
