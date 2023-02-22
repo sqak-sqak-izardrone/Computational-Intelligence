@@ -16,12 +16,13 @@ class Perceptron:
     # 3. its activation function, a string
     def __init__(self, features, init_weight, activation_function="sigmoid"):
         self.features=features
-        self.weights=init_weight[0:len(features)]
-        self.bias=init_weight[len(features)]
+        self.weights=init_weight[0:features]
+        self.bias=init_weight[features]
         self.activation_function=activation_function
         self.acti_value=0
         self.z_value=0
         self.gradient=np.ndarray(features+1)
+        self.batch_gradient=np.ndarray(features+1)
         
         
         
@@ -138,8 +139,10 @@ class Layer:
             for y in range(self.input_length):
                 subsum3=backward_layer_activation[y]
                 self.perceptrons[x].gradient[y]=subsum1*subsum2*subsum3
+                self.perceptrons[x].batch_gradient[y]+=subsum1*subsum2*subsum3
             # the bias
             self.perceptrons[x].gradient[self.input_length]=subsum1*subsum2
+            self.perceptrons[x].batch_gradient[self.input_length]+=subsum1*subsum2
         return partial
      
     
@@ -172,8 +175,10 @@ class ANN:
             for y in range(self.input_length):
                 subsum3=self.layers[len(self.layers)-2].perceptrons[y].acti_value
                 self.layers[len(self.layers)-1].perceptrons[x].gradient[y]=subsum1*subsum2*subsum3
+                self.layers[len(self.layers)-1].perceptrons[x].batch_gradient[y]+=subsum1*subsum2*subsum3
             # the bias
             self.layers[len(self.layers)-1].perceptrons[x].gradient[self.input_length]=subsum1*subsum2
+            self.layers[len(self.layers)-1].perceptrons[x].batch_gradient[self.input_length]+=subsum1*subsum2
         for x in reversed(range(1,len(self.layers)-1)):
             partial=self.layers[x].back_propagation(partial,self.layers[x+1],self.layers[x-1].activation_values)
         # for the first layer the "backward layer activation value" is just the input
@@ -183,10 +188,24 @@ class ANN:
     # back propagation for a batch of records
     # the gradient for a batch of records is the average of the gradients for each record
     # update the gradients in each perceptron
-    def back_propagation_batch(self,inputs):
-        pass
+    def back_propagation_batch(self,inputs,targets,loss_function_deriv):
+        #initialize all batch gradient to 0
+        for x in range(self.layer_number):
+            for y in range(self.layers[x].peceptron_number):
+                for z in range(self.layers[x].perceptrons[y].features+1):
+                    self.layers[x].perceptrons[y].batch_gradient[z]=0
+        input_length=len(inputs)
+        # sum all gradients for different records together in batch_gradient
+        for i in range(input_length):
+            self.back_propagation(loss_function_deriv,inputs[i],targets[i])
+        #average all gradients for the same parameters and update to the gradient
+        for x in range(self.layer_number):
+            for y in range(self.layers[x].peceptron_number):
+                for z in range(self.layers[x].perceptrons[y].features+1):
+                    self.layers[x].perceptrons[y].batch_gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]/input_length
+                    self.layers[x].perceptrons[y].gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]
     
-    def gradient_decent(self,learning_rate)
+    def gradient_decent(self,learning_rate):
         for x in range(self.layer_number):
             for y in range(self.layers[x].perceptron_number):
                 for z in range(self.layers[x].input_length+1):
