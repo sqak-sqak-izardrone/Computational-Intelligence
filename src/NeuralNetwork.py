@@ -57,15 +57,15 @@ class Perceptron:
             raise ValueError("No such activation function!")
      
     # sigmoid function and its derivative    
-    def sigmoid(s):
+    def sigmoid(self,s):
         return 1/(1 + np.exp(-s))
     def sigmoid_deriv(self, s):
         return  self.sigmoid(s)*(1-self.sigmoid(s))
     
     #tanh function and its derivative
-    def tanh(s):
+    def tanh(self,s):
         return (np.exp(s)-np.exp(-s))/(np.exp(s)+np.exp(-s))
-    def tanh_deriv(s):
+    def tanh_deriv(self,s):
         return (np.exp(s)-np.exp(-s))/2*(np.exp(s)-np.exp(-s))/2
     
     # return the activation value for the given input
