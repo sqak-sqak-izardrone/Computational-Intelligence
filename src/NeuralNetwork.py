@@ -144,7 +144,7 @@ class Layer:
             # the bias
             self.perceptrons[x].gradient[self.input_length]=subsum1*subsum2
             self.perceptrons[x].batch_gradient[self.input_length]+=subsum1*subsum2
-        print("propagate through layer")
+        #print("propagate through layer")
         #return the derivative on the activation value for the backward layer
         return partial
      
@@ -219,21 +219,18 @@ class ANN:
     # a gradient decent
     # returns true if the gradient is lower or equal to the threshold
     def gradient_decent(self,learning_rate,threshold):
+        converged=True
         for x in range(self.layer_number):
             for y in range(self.layers[x].perceptron_number):
                 for z in range(self.layers[x].input_length):
+                    self.layers[x].perceptrons[y].weights[z]-=learning_rate*self.layers[x].perceptrons[y].gradient[z]
                     if np.abs(self.layers[x].perceptrons[y].gradient[z])>threshold:
-                        self.layers[x].perceptrons[y].weights[z]-=learning_rate*self.layers[x].perceptrons[y].gradient[z]
-                    else:
-                        print("converged")
-                        return True
+                        converged=False
                 #for the bias
-                if np.abs(self.layers[x].perceptrons[y].gradient[self.layers[x].input_length])>threshold:
-                    self.layers[x].perceptrons[y].bias-=learning_rate*self.layers[x].perceptrons[y].gradient[self.layers[x].input_length]
-                else:
-                    print("converged")
-                    return True
-        return False
+                self.layers[x].perceptrons[y].bias-=learning_rate*self.layers[x].perceptrons[y].gradient[self.layers[x].input_length]
+                if np.abs(self.layers[x].perceptrons[y].gradient[self.layers[x].input_length])>threshold:   
+                    converged=False
+        return converged
                     
     def train(self, inputs, targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
         #do:
@@ -245,8 +242,7 @@ class ANN:
         while True:
             converged=True
             self.back_propagation_batch(loss_function_deriv,inputs,targets)
-            converged=self.gradient_decent(learning_rate,threshold) and converged
-                
+            converged=self.gradient_decent(learning_rate,threshold) and converged   
             if converged:
                 break
                 
