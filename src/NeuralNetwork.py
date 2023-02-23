@@ -183,14 +183,14 @@ class ANN:
             # the bias
             self.layers[len(self.layers)-1].perceptrons[x].gradient[self.layers[len(self.layers)-1].input_length]=subsum1*subsum2
             self.layers[len(self.layers)-1].perceptrons[x].batch_gradient[self.layers[len(self.layers)-1].input_length]+=subsum1*subsum2
-            print(self.layers[len(self.layers)-1].perceptrons[x].gradient)        
+            #print(self.layers[len(self.layers)-1].perceptrons[x].gradient)        
         # back propagation for the hidden layers
         for x in reversed(range(1,len(self.layers)-1)):
             partial=self.layers[x].back_propagation(partial,self.layers[x+1],self.layers[x-1].activation_values)
         # back propagation for the first layer
         # for the first layer the "backward layer activation value" is just the input
         self.layers[0].back_propagation(partial,self.layers[1],input)
-        print(self.layers[0].perceptrons[x].gradient)
+        #print(self.layers[0].perceptrons[x].gradient)
         
     
     # back propagation for a batch of records
@@ -212,23 +212,26 @@ class ANN:
                 for z in range(self.layers[x].perceptrons[y].features+1):
                     self.layers[x].perceptrons[y].batch_gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]/input_length
                     self.layers[x].perceptrons[y].gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]
+        for x in range(self.layer_number):
+            for y in range(self.layers[x].perceptron_number):
+                print(self.layers[x].perceptrons[y].gradient)
     
     # a gradient decent
     # returns true if the gradient is lower or equal to the threshold
     def gradient_decent(self,learning_rate,threshold):
-        print("grad")
         for x in range(self.layer_number):
             for y in range(self.layers[x].perceptron_number):
                 for z in range(self.layers[x].input_length):
-                    print(self.layers[x].perceptrons[y].gradient[z])
                     if np.abs(self.layers[x].perceptrons[y].gradient[z])>threshold:
                         self.layers[x].perceptrons[y].weights[z]-=learning_rate*self.layers[x].perceptrons[y].gradient[z]
                     else:
+                        print("converged")
                         return True
                 #for the bias
                 if np.abs(self.layers[x].perceptrons[y].gradient[self.layers[x].input_length])>threshold:
                     self.layers[x].perceptrons[y].bias-=learning_rate*self.layers[x].perceptrons[y].gradient[self.layers[x].input_length]
                 else:
+                    print("converged")
                     return True
         return False
                     
@@ -240,8 +243,6 @@ class ANN:
         #while(gradient>threshold)
         count=0
         while True:
-            count+=1
-            print(count)
             converged=True
             self.back_propagation_batch(loss_function_deriv,inputs,targets)
             converged=self.gradient_decent(learning_rate,threshold) and converged
