@@ -68,6 +68,11 @@ class Perceptron:
     def tanh_deriv(self,s):
         return 1-self.tanh(s)*self.tanh(s)
     
+    def ReLu(self, s): 
+        return max(0,s)
+    def ReLu_deriv(self, s):
+        return 1 if s > 0 else 0
+    
     # return the activation value for the given input
     def feed_forward(self, input):
         self.z_value=np.dot(input,self.weights)+self.bias
