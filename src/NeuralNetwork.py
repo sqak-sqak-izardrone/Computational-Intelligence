@@ -67,11 +67,14 @@ class Perceptron:
         return (np.exp(s)-np.exp(-s))/(np.exp(s)+np.exp(-s))
     def tanh_deriv(self,s):
         return 1-self.tanh(s)*self.tanh(s)
-    
+    #ReLu activation function and its derivative 
     def ReLu(self, s): 
         return max(0,s)
     def ReLu_deriv(self, s):
         return 1 if s > 0 else 0
+    #x has to be a vector 
+    def softmax(x):
+        return np.ex(x)/np.sum(np.exp(x), axis = 0)
     
     # return the activation value for the given input
     def feed_forward(self, input):
