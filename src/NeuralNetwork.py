@@ -114,6 +114,8 @@ class Layer:
         self.perceptrons = []
         for x in range(perceptron_number):
             self.perceptrons.append(Perceptron(input_length,init_weight,activation_function))
+            for i in len(range(self.perceptrons[x].weights)):
+                self.perceptrons[x].weights[i] = np.random.normal(0, 2/(perceptron_number - 1)) ##initialize weights
             
     # feed forward for this layer
     # gather the feed forward results from each perceptron of this layer and 
@@ -253,7 +255,7 @@ class ANN:
             converged=self.gradient_decent(learning_rate,threshold) and converged   
             if converged:
                 break
-                
+
             
         
         
