@@ -14,10 +14,15 @@ class Perceptron:
     # 1. its number of input features
     # 2. its initial weight , an array of length features+1 with the last term as bias
     # 3. its activation function, a string
-    def __init__(self, features, activation_function="sigmoid"):
+    def __init__(self, features, n_perceptrons, activation_function = "sigmoid"):
         self.features=features
         self.weights = []
-        self.bias = 0
+        for i in range(features):
+            if(n_perceptrons - 1 > 0):
+                self.weights.append(np.random.normal(0, 2/(n_perceptrons - 1)))
+            else:
+                self.weights.append(np.random.normal(0, 2))
+        self.bias = np.random.normal(0, 2/(n_perceptrons - 1)) if (n_perceptrons - 1 > 0) else np.random.normal(0, 2)
         self.activation_function=activation_function
         self.z_value=0
         self.gradient=np.ndarray(features+1)
@@ -37,9 +42,9 @@ class Perceptron:
     # depends on the activation function type of the perceptron 
     # currently, sigmoid and tanh is provided
     def activate(self,s):
-        if(self.activation_function=="sigmoid"):
+        if(self.activation_function =="sigmoid"):
             return self.sigmoid(s)
-        elif(self.activation_function=="tanh"):
+        elif(self.activation_function =="tanh"):
             return self.tanh(s)
         elif(self.activation_function == "ReLu"):
             return self.ReLu(s)
@@ -124,10 +129,7 @@ class Layer:
         self.activation_values=np.ndarray(perceptron_number)
         self.perceptrons = []
         for x in range(perceptron_number):
-            self.perceptrons.append(Perceptron(input_length,activation_function))
-            for i in len(range(self.perceptrons[x].weights)):
-                self.perceptrons[x].weights[i] = np.random.normal(0, 2/(perceptron_number - 1)) ##initialize weights
-            self.perceptrons[x].bias = np.random.normal(0, 2/(perceptron_number - 1))
+            self.perceptrons.append(Perceptron(input_length, perceptron_number,activation_function))
     # feed forward for this layer
     # gather the feed forward results from each perceptron of this layer and 
     # return the results combined in an array of length len(self.perceptrons)
