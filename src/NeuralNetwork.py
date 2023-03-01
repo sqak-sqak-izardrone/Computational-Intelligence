@@ -49,7 +49,7 @@ class Perceptron:
         elif(self.activation_function == "ReLu"):
             return self.ReLu(s)
         elif(self.activation_function == "softmax"):
-            return self.softmax(s)
+            return self.stable_softmax(s)
         else:
             raise ValueError("No such activation function!")
             
