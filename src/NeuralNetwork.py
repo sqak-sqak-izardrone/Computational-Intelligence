@@ -14,10 +14,10 @@ class Perceptron:
     # 1. its number of input features
     # 2. its initial weight , an array of length features+1 with the last term as bias
     # 3. its activation function, a string
-    def __init__(self, features, init_weight, activation_function="sigmoid"):
+    def __init__(self, features, activation_function="sigmoid"):
         self.features=features
-        self.weights=init_weight[0:features]
-        self.bias=init_weight[features]
+        self.weights = []
+        self.bias = 0
         self.activation_function=activation_function
         self.z_value=0
         self.gradient=np.ndarray(features+1)
@@ -41,6 +41,10 @@ class Perceptron:
             return self.sigmoid(s)
         elif(self.activation_function=="tanh"):
             return self.tanh(s)
+        elif(self.activation_function == "ReLu"):
+            return self.ReLu(s)
+        elif(self.activation_function == "softmax"):
+            return self.softmax(s)
         else:
             raise ValueError("No such activation function!")
             
@@ -53,6 +57,10 @@ class Perceptron:
             return self.sigmoid_deriv(s)
         elif(self.activation_function=="tanh"):
             return self.tanh_deriv(s)
+        elif(self.activation_function == "ReLu"): 
+            return self.ReLu_deriv(s)
+        elif(self.activation_function == "softmax"):
+            return self.stable_softmax_deriv(s)
         else:
             raise ValueError("No such activation function!")
      
@@ -72,9 +80,12 @@ class Perceptron:
         return max(0,s)
     def ReLu_deriv(self, s):
         return 1 if s > 0 else 0
-    #x has to be a vector 
-    def softmax(x):
-        return np.ex(x - np.max(x))/np.sum(np.exp(x), axis = 0)
+    
+    ##Softmax activation and its derivative 
+    def stable_softmax(s):
+        return Layer.stable_softmax(s) 
+    def stable_softmax_deriv(self, s):   
+        return self.stable_softmax(s)*(1 - self.stable_softmax(s))
     
     # return the activation value for the given input
     def feed_forward(self, input):
@@ -84,7 +95,7 @@ class Perceptron:
     # the feed forward for step function activation
     # only used for logic gate case
     def simple_feed_forward(self,input):
-        sum=np.dot(input,self.weights)+self.bias
+        sum=np.dot(input,self.weights)+self.bias ## calculating the linear equation z = w^T*x + b 
         print(sum)
         return self.step(sum)
     
@@ -106,17 +117,17 @@ class Layer:
     # construct the layer
     # specify the activation function , number of perceptrons, input feature number and initial weight for each perceptron
     # we give all perceptron the same initial weights
-    def __init__(self, perceptron_number, input_length, init_weight, activation_function="sigmoid"):
+    def __init__(self, perceptron_number, input_length, activation_function="sigmoid"):
         self.input_length=input_length
         self.perceptron_number=perceptron_number
         self.activation_function=activation_function
         self.activation_values=np.ndarray(perceptron_number)
         self.perceptrons = []
         for x in range(perceptron_number):
-            self.perceptrons.append(Perceptron(input_length,init_weight,activation_function))
+            self.perceptrons.append(Perceptron(input_length,activation_function))
             for i in len(range(self.perceptrons[x].weights)):
                 self.perceptrons[x].weights[i] = np.random.normal(0, 2/(perceptron_number - 1)) ##initialize weights
-            
+            self.perceptrons[x].bias = np.random.normal(0, 2/(perceptron_number - 1))
     # feed forward for this layer
     # gather the feed forward results from each perceptron of this layer and 
     # return the results combined in an array of length len(self.perceptrons)
@@ -157,6 +168,15 @@ class Layer:
         #print("propagate through layer")
         #return the derivative on the activation value for the backward layer
         return partial
+    
+    #x is the input vector (activation value) from the previous layer
+    def stable_softmax(self, x):
+        summation_exp = 0 
+        for p in self.perceptrons: 
+            summation_exp += np.exp(np.dot(self.activation_values, p.weights) + p.bias)
+        return np.exp(x)/summation_exp
+        
+
      
     
         
@@ -247,7 +267,7 @@ class ANN:
         #batch the inputs into different batches
         #back propagates on these batches to get the gradients
         #perform gradient decent
-        #while(gradient>threshold)
+        #while(gradient>threshold)  
         count=0
         while True:
             converged=True
