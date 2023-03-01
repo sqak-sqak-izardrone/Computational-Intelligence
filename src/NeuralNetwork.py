@@ -74,7 +74,7 @@ class Perceptron:
         return 1 if s > 0 else 0
     #x has to be a vector 
     def softmax(x):
-        return np.ex(x)/np.sum(np.exp(x), axis = 0)
+        return np.ex(x - np.max(x))/np.sum(np.exp(x), axis = 0)
     
     # return the activation value for the given input
     def feed_forward(self, input):
