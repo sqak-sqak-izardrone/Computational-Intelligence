@@ -264,7 +264,7 @@ class ANN:
                     converged=False
         return converged
                     
-    def train(self, inputs, targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
+    def train(self, inputs, targets, learning_rate, threshold, loss_function_deriv, batch_size=1):
         #do:
         #batch the inputs into different batches
         #back propagates on these batches to get the gradients
