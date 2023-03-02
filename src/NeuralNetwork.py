@@ -181,8 +181,7 @@ class Layer:
         for p in self.perceptrons: 
             z_value_arr.append(np.dot(self.input, p.weights) + p.bias)
         max_value = np.max(z_value_arr)
-        for x in z_value_arr:   
-            x -= max_value
+        z_value_arr = [x - max_value for x in z_value_arr]
         return np.exp(x - max_value)/ np.sum(np.exp(z_value_arr))
 class ANN:
     # ANN artificial neural network model, initialize the model with a list of layers
