@@ -135,6 +135,9 @@ class Layer:
     # return the results combined in an array of length len(self.perceptrons)
     def feed_forward(self,input):
         result = np.ndarray(len(self.perceptrons))
+        ## store the activation values of previous layer to calculate the softmax functions 
+        self.input = input 
+        ##
         for x in range(len(self.perceptrons)):
             self.activation_values[x]=self.perceptrons[x].feed_forward(input)
             result[x]=self.activation_values[x]
@@ -176,7 +179,7 @@ class Layer:
         summation_exp = 0 
         z_value_arr = []
         for p in self.perceptrons: 
-            z_value_arr.append(np.dot(self.activation_values, p.weights) + p.bias)
+            z_value_arr.append(np.dot(self.input, p.weights) + p.bias)
         max_value = np.max(z_value_arr)
         for x in z_value_arr:   
             x -= max_value
