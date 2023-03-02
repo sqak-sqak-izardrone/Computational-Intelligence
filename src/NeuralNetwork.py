@@ -107,7 +107,7 @@ class Perceptron:
     # only used for logic gate case
     def simple_feed_forward(self,input):
         sum=np.dot(input,self.weights)+self.bias ## calculating the linear equation z = w^T*x + b 
-        print(sum)
+        #print(sum)
         return self.step(sum)
     
     # update weight
@@ -202,7 +202,7 @@ class ANN:
         partial=np.ndarray(len(target))
         result = self.predict(input)
         for x in range(len(target)):
-            partial[x]=loss_function_deriv(result,target)
+            partial[x]=loss_function_deriv(x,result,target)
             subsum1=partial[x]
             subsum2=self.layers[len(self.layers)-1].perceptrons[x].activation_deriv(self.layers[len(self.layers)-1].perceptrons[x].z_value)
             for y in range(self.layers[len(self.layers)-1].input_length):
@@ -241,9 +241,9 @@ class ANN:
                 for z in range(self.layers[x].perceptrons[y].features+1):
                     self.layers[x].perceptrons[y].batch_gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]/input_length
                     self.layers[x].perceptrons[y].gradient[z]=self.layers[x].perceptrons[y].batch_gradient[z]
-        for x in range(self.layer_number):
-            for y in range(self.layers[x].perceptron_number):
-                print(self.layers[x].perceptrons[y].gradient)
+        #for x in range(self.layer_number):
+        #    for y in range(self.layers[x].perceptron_number):
+        #        print(self.layers[x].perceptrons[y].gradient)
     
     # a gradient decent
     # returns true if the gradient is lower or equal to the threshold
@@ -254,6 +254,7 @@ class ANN:
                 for z in range(self.layers[x].input_length):
                     self.layers[x].perceptrons[y].weights[z]-=learning_rate*self.layers[x].perceptrons[y].gradient[z]
                     if np.abs(self.layers[x].perceptrons[y].gradient[z])>threshold:
+                        #print(self.layers[x].perceptrons[y].gradient[z])
                         converged=False
                 #for the bias
                 self.layers[x].perceptrons[y].bias-=learning_rate*self.layers[x].perceptrons[y].gradient[self.layers[x].input_length]
@@ -261,19 +262,36 @@ class ANN:
                     converged=False
         return converged
                     
-    def train(self, inputs, targets, learning_rate, threshold, loss_function_deriv, batch_size=1):
+    def train(self, inputs, targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
         #do:
         #batch the inputs into different batches
         #back propagates on these batches to get the gradients
         #perform gradient decent
         #while(gradient>threshold)  
-        count=0
+        
+        loss=[]
         while True:
+            batch_number=len(inputs)//batch_size
+            indices=np.random.permutation(len(inputs))
+            feature_batches=[]
+            target_batches=[]
+            for x in range(batch_number):
+                feature_batches.append(inputs[indices[x*batch_size:(x+1)*batch_size],:])
+                target_batches.append(targets[indices[x*batch_size:(x+1)*batch_size],:])
             converged=True
-            self.back_propagation_batch(loss_function_deriv,inputs,targets)
-            converged=self.gradient_decent(learning_rate,threshold) and converged   
+            for x in range(batch_number):
+                self.back_propagation_batch(loss_function_deriv,feature_batches[x],target_batches[x])
+                converged=self.gradient_decent(learning_rate,threshold) and converged   
+                loss_value=0
+                for y in range(batch_size):
+                    loss_value+=loss_function(self.predict(feature_batches[x][y]),target_batches[x][y])
+                loss.append(loss_value/batch_size)
+                if converged:
+                    break
+            
             if converged:
                 break
+        return loss
 
             
         
