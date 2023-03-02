@@ -14,7 +14,7 @@ class Perceptron:
     # 1. its number of input features
     # 2. its initial weight , an array of length features+1 with the last term as bias
     # 3. its activation function, a string
-    def __init__(self, features, layer, n_perceptrons, activation_function = "sigmoid"):
+    def __init__(self, features, perceptrons, n_perceptrons, activation_function = "sigmoid"):
         self.features=features
         self.weights = []
         for i in range(features):
@@ -27,7 +27,7 @@ class Perceptron:
         self.z_value=0
         self.gradient=np.ndarray(features+1)
         self.batch_gradient=np.ndarray(features+1)
-        self.layer = layer
+        self.perceptrons = perceptrons
         
         
     # a step function
@@ -41,7 +41,7 @@ class Perceptron:
     # the general activation function, it switches to different concreate activation function 
     # depends on the activation function type of the perceptron 
     # currently, sigmoid and tanh is provided
-    def activate(self,s):
+    def activate(self,s, input):
         if(self.activation_function =="sigmoid"):
             return self.sigmoid(s)
         elif(self.activation_function =="tanh"):
@@ -49,7 +49,7 @@ class Perceptron:
         elif(self.activation_function == "ReLu"):
             return self.ReLu(s)
         elif(self.activation_function == "softmax"):
-            return self.stable_softmax(s)
+            return self.stable_softmax(s, input)
         else:
             raise ValueError("No such activation function!")
             
@@ -65,7 +65,7 @@ class Perceptron:
         elif(self.activation_function == "ReLu"): 
             return self.ReLu_deriv(s)
         elif(self.activation_function == "softmax"):
-            return self.stable_softmax_deriv(s)
+            return self.stable_softmax_deriv()
         else:
             raise ValueError("No such activation function!")
      
@@ -87,15 +87,21 @@ class Perceptron:
         return 1 if s > 0 else 0
     
     ##Softmax activation and its derivative 
-    def stable_softmax(self,s):
-        return self.layer.stable_softmax(s) 
-    def stable_softmax_deriv(self, s):   
-        return self.stable_softmax(s)*(1 - self.stable_softmax(s))
+    def stable_softmax(self,s, input):
+        z_value_arr = []
+        for p in self.perceptrons: 
+            z_value_arr.append(np.dot(input, p.weights) + p.bias)
+        max_value = np.max(z_value_arr)
+        z_value_arr = [x - max_value for x in z_value_arr]
+        self.softmax = np.exp(s - max_value)/ np.sum(np.exp(z_value_arr))
+        return self.softmax
     
+    def stable_softmax_deriv(self):   
+        return self.softmax*(1 - self.softmax)
     # return the activation value for the given input
     def feed_forward(self, input):
         self.z_value=np.dot(input,self.weights)+self.bias
-        return self.activate(self.z_value)        
+        return self.activate(self.z_value, input)        
      
     # the feed forward for step function activation
     # only used for logic gate case
@@ -129,7 +135,7 @@ class Layer:
         self.activation_values=np.ndarray(perceptron_number)
         self.perceptrons = []
         for x in range(perceptron_number):
-            self.perceptrons.append(Perceptron(input_length,self, perceptron_number,activation_function))
+            self.perceptrons.append(Perceptron(input_length, self.perceptrons,perceptron_number,activation_function))
     # feed forward for this layer
     # gather the feed forward results from each perceptron of this layer and 
     # return the results combined in an array of length len(self.perceptrons)
@@ -173,16 +179,7 @@ class Layer:
         #print("propagate through layer")
         #return the derivative on the activation value for the backward layer
         return partial
-    
-    #x is the input vector (activation value) from the previous layer
-    def stable_softmax(self, x):
-        summation_exp = 0 
-        z_value_arr = []
-        for p in self.perceptrons: 
-            z_value_arr.append(np.dot(self.input, p.weights) + p.bias)
-        max_value = np.max(z_value_arr)
-        z_value_arr = [x - max_value for x in z_value_arr]
-        return np.exp(x - max_value)/ np.sum(np.exp(z_value_arr))
+        
 class ANN:
     # ANN artificial neural network model, initialize the model with a list of layers
     def __init__(self, layers):
