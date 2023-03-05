@@ -3,7 +3,7 @@ import numpy as np
 
 EPSILON = 1e-10
 
-def cross_validation(X, y, splits = [0.7, 0.15, 0.15], k=5, grids = [[0.5], [1000], ["mse"], [1, 2, 3, 4]]):
+def cross_validation(X, y, splits = [0.7, 0.15, 0.15], k=5, hyperparameters = [0.1, 0.001, "mse", "mse_deriv"]):
     """
     Performs cross-validation on the given data.
     
@@ -32,7 +32,7 @@ def cross_validation(X, y, splits = [0.7, 0.15, 0.15], k=5, grids = [[0.5], [100
     y_test_set = y[:num_sample_test]
 
     # starts from the index num_sample_test (since the first num_sample_test has been reserved for testing)
-    score, hyper_parameters = k_fold_cross_validation(X[num_sample_test:], y[num_sample_test:], model, k, grids)
+    score, hyper_parameters = k_fold_cross_validation(X[num_sample_test:], y[num_sample_test:], model, k, hyperparameters)
 
     #Train on the train and validation set with BEST hyper parameters
     model.train(X[num_sample_test:], y[num_sample_test:], hyper_parameters[0], hyper_parameters[1], hyper_parameters[2], "mse_deriv", hyper_parameters[3])
@@ -42,7 +42,7 @@ def cross_validation(X, y, splits = [0.7, 0.15, 0.15], k=5, grids = [[0.5], [100
 
     return score
 
-def k_fold_cross_validation(X, y, model, k=5, grids = [[0.5], [1000], ["mse"], [1, 2, 3, 4]]):
+def k_fold_cross_validation(X, y, model, k=5, hyper_parameters = [0.5, 0.001, "mse", "mse_deriv", 3]):
     """
     Performs k-fold cross-validation on the given data.
     
@@ -80,7 +80,19 @@ def k_fold_cross_validation(X, y, model, k=5, grids = [[0.5], [1000], ["mse"], [
         y_val = y_folds[i]
         
         # Train the model on the training set
-        model.train(X_train, y_train, grids[0][0], grids[1][0], grids[2][0], "mse_deriv", grids[3][0])
+        model.train(X_train, 
+                    y_train, 
+                    # Learning rate
+                    hyper_parameters[0], 
+                    # Threshhold
+                    hyper_parameters[1], 
+                    # Loss function
+                    hyper_parameters[2], 
+                    # Loss function deriv
+                    hyper_parameters[3], 
+                    # Loss function
+                    hyper_parameters[4]
+                    )
         
         # Evaluate the model on the validation set and store the score
         results = model.predict(X_val)
@@ -94,7 +106,7 @@ def k_fold_cross_validation(X, y, model, k=5, grids = [[0.5], [1000], ["mse"], [
     #   prev_score = score
     #   hyper_parameters = current_set_of_hp
 
-    return score, hyper_parameters 
+    return score 
 
 
 #test:
