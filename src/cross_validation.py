@@ -69,8 +69,6 @@ def k_fold_cross_validation(X, y, model, k=5, hyper_parameters = [0.5, 0.001, "m
     prev_score = -1
     score = 0
 
-    """TODO: IMPLEMENT GRID SEARCH (OUTER LOOP TO SEARCH ALL THE POSSIBLE COMBINATIONS OF HP)"""
-    
     # loops through all the folds
     for i in range(k):
         # Use the i-th fold as the validation set, and the rest as the training set
