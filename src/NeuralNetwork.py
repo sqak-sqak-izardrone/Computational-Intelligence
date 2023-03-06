@@ -194,6 +194,14 @@ class ANN:
         for x in range(len(self.layers)):
             result=self.layers[x].feed_forward(result) # the result of the previous layer(or initial input) serves as the input for the curren layer
         return result
+
+    def predictBatch(self, inputs):
+        size = len(inputs)
+        results = np.ndarray((size,self.layers[self.layer_number-1].perceptron_number))
+
+        for i in range(size):
+            results[i] = self.predict(inputs[i])
+        return results
     
     # back propagation for one sample
     # update the gradients in each perceptron
@@ -276,8 +284,8 @@ class ANN:
             feature_batches=[]
             target_batches=[]
             for x in range(batch_number):
-                feature_batches.append(inputs[indices[x*batch_size:(x+1)*batch_size],:])
-                target_batches.append(targets[indices[x*batch_size:(x+1)*batch_size],:])
+                feature_batches.append(inputs[indices[x*batch_size:(x+1)*batch_size], :])
+                target_batches.append(targets[indices[x*batch_size:(x+1)*batch_size], :])
             converged=True
             for x in range(batch_number):
                 self.back_propagation_batch(loss_function_deriv,feature_batches[x],target_batches[x])
