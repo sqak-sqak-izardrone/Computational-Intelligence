@@ -270,7 +270,7 @@ class ANN:
                     converged=False
         return converged
                     
-    def train(self, inputs, targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
+    def train(self, inputs, targets, val_inputs, val_targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
         #do:
         #batch the inputs into different batches
         #back propagates on these batches to get the gradients
@@ -278,6 +278,8 @@ class ANN:
         #while(gradient>threshold)  
         
         loss=[]
+        val_loss=[]
+        t_loss=[loss,val_loss]
         while True:
             batch_number=len(inputs)//batch_size
             indices=np.random.permutation(len(inputs))
@@ -289,17 +291,20 @@ class ANN:
             converged=True
             for x in range(batch_number):
                 self.back_propagation_batch(loss_function_deriv,feature_batches[x],target_batches[x])
-                converged=self.gradient_decent(learning_rate,threshold) and converged   
+                converged=self.gradient_decent(learning_rate,threshold) and converged 
                 loss_value=0
                 for y in range(batch_size):
                     loss_value+=loss_function(self.predict(feature_batches[x][y]),target_batches[x][y])
-                loss.append(loss_value/batch_size)
+                loss.append(loss_value/batch_size)  
+                loss_value=0
+                for y in range(len(val_inputs)):
+                    loss_value+=loss_function(self.predict(val_inputs[y]),val_targets[y])
+                val_loss.append(loss_value/len(val_inputs))
                 if converged:
                     break
-            
             if converged:
                 break
-        return loss
+        return t_loss
 
             
         
