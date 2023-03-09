@@ -79,6 +79,8 @@ def k_fold_cross_validation(X, y, model, loss_func, loss_deriv, k=5, hyper_param
         # Train the model on the training set
         total_loss = model.train(X_train, 
                     y_train, 
+                    X_val[:1],
+                    y_val[:1],
                     # Learning rate
                     hyper_parameters[0], 
                     # Threshhold
