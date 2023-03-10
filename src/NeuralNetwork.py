@@ -356,7 +356,19 @@ class ANN:
                 break
         return t_loss
     
-
+    # this is the training method for the overall model for only one epoch
+    # this takes in:
+    # 1. the inputs of the training data
+    # 2. the target output of the training data
+    # 3. the validation set(not necessarily the whole validation set)4
+    # 4. the target for the validation set
+    # 5. learning rate
+    # 6. threshold for convergence
+    # 7. the loss function
+    # 8. the derivative for the loss function
+    # 9. the batch size for mini_batching, SGD in batch_size=1 by default, no batching if batch_size=len(inputs)
+    # updates the weights and bias for the model and trains it to fit the target
+    # returns a (2,) shape array containing the loss value for the batch and the validation set for each iteration  
     def train_one_epoch(self, inputs, targets, val_inputs, val_targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
         #do:
         #randomly batch the inputs into different batches
