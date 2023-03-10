@@ -344,9 +344,9 @@ class ANN:
             #stores the loss value for this iteration, used a random batch for efficiency
             loss_value=0
             x=np.random.randint(0,batch_number)
-            for y in range(inputs):
+            for y in range(len(inputs)):
                 loss_value+=loss_function(self.predict(inputs[y]),targets[y])
-            loss.append(loss_value/batch_size)
+            loss.append(loss_value/len(inputs))
             #stores the loss value for validation set
             loss_value=0
             for y in range(len(val_inputs)):
