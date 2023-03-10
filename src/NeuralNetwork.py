@@ -345,15 +345,53 @@ class ANN:
                 for y in range(batch_size):
                     loss_value+=loss_function(self.predict(feature_batches[x][y]),target_batches[x][y])
                 loss.append(loss_value/batch_size)  
+                
+                if converged:
+                    break
                 #stores the loss value for validation set
                 loss_value=0
                 for y in range(len(val_inputs)):
                     loss_value+=loss_function(self.predict(val_inputs[y]),val_targets[y])
                 val_loss.append(loss_value/len(val_inputs))
-                if converged:
-                    break
             if converged:
                 break
+        return t_loss
+    
+
+    def train_one_epoch(self, inputs, targets, val_inputs, val_targets, learning_rate, threshold, loss_function, loss_function_deriv, batch_size=1):
+        #do:
+        #randomly batch the inputs into different batches
+        #back propagates on these batches to get the gradients
+        #perform gradient decent
+        #stores the loss value
+        #while(gradient>threshold)  
+        
+        loss=[]
+        val_loss=[]
+        t_loss=[loss,val_loss]
+            #randomized batching
+        batch_number=len(inputs)//batch_size
+        indices=np.random.permutation(len(inputs))
+        feature_batches=[]
+        target_batches=[]
+        for x in range(batch_number):
+            feature_batches.append(inputs[indices[x*batch_size:(x+1)*batch_size], :])
+            target_batches.append(targets[indices[x*batch_size:(x+1)*batch_size], :])
+        #backward propagation and gradient decent
+        for x in range(batch_number):
+            self.back_propagation_batch(loss_function_deriv,feature_batches[x],target_batches[x])
+            self.gradient_decent(learning_rate,threshold)
+            #stores the loss value for this iteration
+        loss_value=0
+        for y in range(len(inputs)):
+            loss_value+=loss_function(self.predict(inputs[y]),targets[y])
+        loss.append(loss_value/len(inputs))  
+        #stores the loss value for validation set
+        loss_value=0
+        for y in range(len(val_inputs)):
+            loss_value+=loss_function(self.predict(val_inputs[y]),val_targets[y])
+        val_loss.append(loss_value/len(val_inputs))
+
         return t_loss
 
             
