@@ -338,21 +338,20 @@ class ANN:
             converged=True
             for x in range(batch_number):
                 self.back_propagation_batch(loss_function_deriv,feature_batches[x],target_batches[x])
-                converged=self.gradient_decent(learning_rate,threshold) and converged 
-
-                #stores the loss value for this iteration
-                loss_value=0
-                for y in range(batch_size):
-                    loss_value+=loss_function(self.predict(feature_batches[x][y]),target_batches[x][y])
-                loss.append(loss_value/batch_size)  
-                
+                converged=self.gradient_decent(learning_rate,threshold) and converged   
                 if converged:
                     break
-                #stores the loss value for validation set
-                loss_value=0
-                for y in range(len(val_inputs)):
-                    loss_value+=loss_function(self.predict(val_inputs[y]),val_targets[y])
-                val_loss.append(loss_value/len(val_inputs))
+            #stores the loss value for this iteration, used a random batch for efficiency
+            loss_value=0
+            x=np.random.randint(0,batch_number)
+            for y in range(inputs):
+                loss_value+=loss_function(self.predict(inputs[y]),targets[y])
+            loss.append(loss_value/batch_size)
+            #stores the loss value for validation set
+            loss_value=0
+            for y in range(len(val_inputs)):
+                loss_value+=loss_function(self.predict(val_inputs[y]),val_targets[y])
+            val_loss.append(loss_value/len(val_inputs))
             if converged:
                 break
         return t_loss
