@@ -388,11 +388,13 @@ class ANN:
         for x in range(batch_number):
             feature_batches.append(inputs[indices[x*batch_size:(x+1)*batch_size], :])
             target_batches.append(targets[indices[x*batch_size:(x+1)*batch_size], :])
+        
         #backward propagation and gradient decent
         for x in range(batch_number):
             self.back_propagation_batch(loss_function_deriv,feature_batches[x],target_batches[x])
             self.gradient_decent(learning_rate,threshold)
-            #stores the loss value for this iteration
+        
+        #stores the loss value for this iteration
         loss_value=0
         for y in range(len(inputs)):
             loss_value+=loss_function(self.predict(inputs[y]),targets[y])
