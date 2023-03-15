@@ -13,9 +13,23 @@ class Ant:
         self.end = path_specification.get_end()
         self.current_position = self.start
         self.rand = random
+        self.route = Route(self.start)
 
     # Method that performs a single run through the maze by the ant.
     # @return The route the ant found through the maze.
     def find_route(self):
-        route = Route(self.start)
-        return route
+        return self.route
+    
+    def add_route(self, dir):
+        if dir == (0, 1):
+            self.route.add(0)
+        elif dir == (0, -1):
+            self.route.add(2)
+        elif dir == (1, 0):
+            self.route.add(3)
+        elif dir == (-1, 0): 
+            self.route.add(1)
+    
+    def length_route(self):
+        self.route.size()
+

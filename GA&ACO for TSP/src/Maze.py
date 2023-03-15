@@ -1,6 +1,7 @@
 import traceback
 import sys
 from Graph import Graph
+from Route import Route
 
 # Class that holds all the maze data. This means the pheromones, the open and blocked tiles in the system as
 # well as the starting and end coordinates.
@@ -44,15 +45,26 @@ class Maze:
     # Update the pheromones along a certain route according to a certain Q
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
-    def add_pheromone_route(self, route, q):
+    def add_pheromone_route(self, start_point, next_point, q):
         return 
 
      # Update pheromones for a list of routes
      # @param routes A list of routes
      # @param Q Normalization factor for amount of dropped pheromone
-    def add_pheromone_routes(self, routes, q):
-        for r in routes:
-            self.add_pheromone_route(r, q)
+    def add_pheromone_routes(self, route: Route, q):
+        start_point = route.get_start()
+        next_point
+        for r in route.get_route():
+            if r == 0 :
+                next_point = (start_point[0], start_point[1] + 1)
+            elif r == 2 :
+                next_point = (start_point[0], start_point[1] - 1)
+            elif r == 3: 
+                next_point = (start_point[0] + 1, start_point[1])
+            elif r == 1: 
+                next_point = (start_point[0] - 1, start_point[1])
+            self.add_pheromone_route(start_point, next_point, q)
+            start_point = next_point 
 
     # Evaporate pheromone
     # @param rho evaporation factor
