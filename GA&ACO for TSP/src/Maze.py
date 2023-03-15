@@ -1,5 +1,6 @@
 import traceback
 import sys
+from Graph import Graph
 
 # Class that holds all the maze data. This means the pheromones, the open and blocked tiles in the system as
 # well as the starting and end coordinates.
@@ -15,11 +16,26 @@ class Maze:
         self.width = width
         self.start = None
         self.end = None
+        self.graph = Graph()
         self.initialize_pheromones()
 
     # Initialize pheromones to a start value.
     def initialize_pheromones(self):
+        for i in range(len(self.walls)):
+            for j in range(len(self.walls[0])):
+                if(self.walls[i][j] == 1):
+                    self.graph.add_node((i,j))
+        
+        for node in self.graph.nodes: 
+            i, j = node
+            for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
+                ni, nj = i+di, j+dj
+                if (ni,nj) in self.graph.nodes:
+                    self.graph.add_edge(node, (ni, nj), 1, 0.001) # Add an edge between adjacent nodes
         return
+
+    def get_graph(self):
+        return self.graph
 
     # Reset the maze for a new shortest path problem.
     def reset(self):
@@ -29,7 +45,7 @@ class Maze:
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
     def add_pheromone_route(self, route, q):
-        return
+        return 
 
      # Update pheromones for a list of routes
      # @param routes A list of routes
