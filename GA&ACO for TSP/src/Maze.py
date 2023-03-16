@@ -47,8 +47,24 @@ class Maze:
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
     def add_pheromone_route(self, route, q):
-        
-        return
+        # Amount of pheromone to add on each edge
+        delta = q / len(route.route)
+        pos = route.start
+        for dir in route.route:
+            curVal = self.pheromones[pos].get(dir)
+            self.pheromones[pos].set(dir, curVal + delta)
+            if dir == Direction.north:
+                self.pheromones[Coordinate(pos.x, pos.y - 1)].set(Direction.south, curVal + delta)
+                pos = Coordinate(pos.x, pos.y - 1)
+            elif dir == Direction.east:
+                self.pheromones[Coordinate(pos.x + 1, pos.y)].set(Direction.west, curVal + delta)
+                pos = Coordinate(pos.x + 1, pos.y)
+            elif dir == Direction.west:
+                self.pheromones[Coordinate(pos.x - 1, pos.y)].set(Direction.east, curVal + delta)
+                pos = Coordinate(pos.x - 1, pos.y)
+            elif dir == Direction.south:
+                self.pheromones[Coordinate(pos.x, pos.y + 1)].set(Direction.south, curVal + delta)
+                pos = Coordinate(pos.x, pos.y + 1)
 
      # Update pheromones for a list of routes
      # @param routes A list of routes
@@ -60,7 +76,9 @@ class Maze:
     # Evaporate pheromone
     # @param rho evaporation factor
     def evaporate(self, rho):
-       return
+       for pos in self.pheromones:
+           self.pheromones[pos].evaporate(rho)
+           
 
     # Width getter
     # @return width of the maze
@@ -76,13 +94,15 @@ class Maze:
     # @param position The position to check the neighbours of.
     # @return the pheromones of the neighbouring positions.
     def get_surrounding_pheromone(self, position):
-        return None
+        if self.inbound(position):
+            return self.pheromones[position]
 
     # Pheromone getter for a specific position. If the position is not in bounds returns 0
     # @param pos Position coordinate
     # @return pheromone at point
     def get_pheromone(self, pos):
-        return 0
+        if self.inbound(pos):
+            return self.pheromones[pos].get_total_surrounding_pheromone()
 
     # Check whether a coordinate lies in the current maze.
     # @param position The position to be checked
