@@ -2,6 +2,7 @@ import traceback
 import sys
 from Graph import Graph
 from Route import Route
+from Direction import Direction
 
 # Class that holds all the maze data. This means the pheromones, the open and blocked tiles in the system as
 # well as the starting and end coordinates.
@@ -48,7 +49,6 @@ class Maze:
     def add_pheromone_route(self, start_point, next_point, q, length_of_route, evaporate):
         adj_edges_list = self.graph.get_neighbors(start_point)
         edge_between = [n for n in adj_edges_list if n[0] == next_point]
-        
         old_pheromone = edge_between[0][1][1] ##((x,y), (weight, pheromone))
         #print("old pheromone" + str(old_pheromone))
         updated_pheromone = (1 - evaporate)*old_pheromone + q/length_of_route
@@ -63,13 +63,13 @@ class Maze:
         start_point = (route.get_start().get_x(), route.get_start().get_y())
         next_point = (0,0)
         for r in route.get_route():
-            if r == 0 :
+            if r == Direction.east :
                 next_point = (start_point[0] + 1, start_point[1])
-            elif r == 2 :
+            elif r == Direction.west :
                 next_point = (start_point[0] - 1, start_point[1])
-            elif r == 3: 
+            elif r == Direction.south: 
                 next_point = (start_point[0], start_point[1] + 1)
-            elif r == 1: 
+            elif r == Direction.north: 
                 next_point = (start_point[0], start_point[1] - 1)
             self.add_pheromone_route(start_point, next_point, q, route.size(), evaporation)
             start_point = next_point 

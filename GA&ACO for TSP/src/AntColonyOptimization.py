@@ -30,11 +30,11 @@ class AntColonyOptimization:
     def find_shortest_route(self, path_specification: PathSpecification):
         self.maze.initialize_pheromones()
         graph = self.maze.get_graph()
+        shortest_route = None 
         for i in range(self.generations):
             ants = self.initilizeAnts(path_specification)
-            #iteration  = 1
-            #while iteration > 0: 
-            while (len(ants) != 0):
+           
+            for ant in ants:
                 ##set-up before traverse the graph
                 start_coordinate = (path_specification.get_start().get_x(), path_specification.get_start().get_y())
                 end_coordinate = (path_specification.get_end().get_x(), path_specification.get_end().get_y())
@@ -43,7 +43,6 @@ class AntColonyOptimization:
                 for node in graph.nodes: 
                     if node != start_coordinate:
                         visited[node] = False
-                ant = ants.pop()
 
                 ## condition for stop: you can not walk anymore
                 while not visited[end_coordinate]:
@@ -51,12 +50,9 @@ class AntColonyOptimization:
                     available_neighbors = [n for n in neighbors if not visited[n[0]]]
                     
                     if not available_neighbors: 
-                        #print(("Start:",start_coordinate))
                         while True:
-                            prev_step = ant.remove_last()
-                            #print(("step", prev_step))
+                            prev_step = ant.remove_last()                           
                             prev_node = self.move_back(start_coordinate, prev_step)
-                            #print(("prev_node", prev_node))
                             prev_neighbors = graph.get_neighbors(prev_node)
                             available_neighbors = [n for n in prev_neighbors if not visited[n[0]]]
                             if available_neighbors:
@@ -74,36 +70,21 @@ class AntColonyOptimization:
                     for adj_node in available_neighbors: 
                             probabilities_of_adj_nodes[adj_node[0]] = adj_node[1][0]**(self.alpha)*(1/adj_node[1][1])**(self.beta)/sum
                     
-                    if len(set(probabilities_of_adj_nodes.values())) == 1: 
-                        ## if all the values are the same we randomly choose a path. 
-                        keys_list = list(probabilities_of_adj_nodes.keys())
-                        next_node = keys_list[random.randint(0, len(keys_list)-1)]
-                    else: 
-                        ## this max function gonna return the key of the map.
-                        next_node = max(probabilities_of_adj_nodes) 
+                    next_node = random.choices(list(probabilities_of_adj_nodes.keys()), list(probabilities_of_adj_nodes.values()))[0]
+                    
                     visited[next_node] = True                   
                     res = (next_node[0] - start_coordinate[0], next_node[1] - start_coordinate[1])
-                    ant.add_route(res)
+                    ant.add_dir(res)
                     start_coordinate = next_node
-                    
-                ##updating pheromone
+            
+            shortest_route = ants[0].find_route()
+            ##updating pheromone
+            for ant in ants: 
+                if shortest_route.size() > ant.find_route().size():
+                    shortest_route = ant.find_route()
                 self.maze.add_pheromone_routes(ant.find_route(), self.q, self.evaporation)
-                #iteration -= 1
-        # for node in graph.nodes:
-        #     print(node, graph.nodes[node].neighbors)
+           
         ## trace the path and add direction to route
-        start_coordinate = (path_specification.get_start().get_x(), path_specification.get_start().get_y())
-        end_coordinate = (path_specification.get_end().get_x(), path_specification.get_end().get_y())
-        shortest_route = Route(path_specification.get_start())
-        walk_node = start_coordinate
-        while walk_node != end_coordinate: 
-            neighbors = graph.nodes[walk_node].neighbors
-            #print(neighbors)
-            next_node = max(neighbors, key=lambda k: neighbors[k][1])
-            direction = self.convert_from_coordinates_to_direction(walk_node, next_node)
-            shortest_route.add(direction)
-            #print(walk_node, next_node)
-            walk_node = next_node
         return shortest_route
     
     def initilizeAnts(self, path_specification):
@@ -112,23 +93,12 @@ class AntColonyOptimization:
             ants.append(Ant(self.maze, path_specification))
         return ants 
     
-    def move_back(self, start_coordinate, prev_step): 
-        if prev_step == 0: 
+    def move_back(self, start_coordinate, prev_step: Direction): 
+        if prev_step == Direction.east: 
             return (start_coordinate[0] - 1, start_coordinate[1])
-        elif prev_step == 1: 
+        elif prev_step == Direction.north: 
             return (start_coordinate[0], start_coordinate[1] + 1)
-        elif prev_step == 2:
+        elif prev_step == Direction.west:
             return (start_coordinate[0] + 1, start_coordinate[1])
-        elif prev_step == 3:
+        elif prev_step == Direction.south:
             return (start_coordinate[0], start_coordinate[1] - 1)
-    
-    def convert_from_coordinates_to_direction(self, start_coordinate, end_coordinate):
-        (di,dj) = (end_coordinate[0] - start_coordinate[0], end_coordinate[1] - start_coordinate[1])
-        if (di, dj) == (0, 1):
-            return Direction(3)
-        elif (di, dj) == (1, 0):
-            return Direction(0)
-        elif (di, dj) == (0, -1):
-            return Direction(1)
-        elif (di, dj) == (-1, 0): 
-            return Direction(2)

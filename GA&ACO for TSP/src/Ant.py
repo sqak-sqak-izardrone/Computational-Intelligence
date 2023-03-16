@@ -1,5 +1,6 @@
 import random
 from Route import Route
+from Direction import Direction
 
 #Class that represents the ants functionality.
 class Ant:
@@ -20,15 +21,15 @@ class Ant:
     def find_route(self):
         return self.route
     
-    def add_route(self, dir):
+    def add_dir(self, dir):
         if dir == (0, 1):
-            self.route.add(3)
+            self.route.add(Direction.south)
         elif dir == (0, -1):
-            self.route.add(1)
+            self.route.add(Direction.north)
         elif dir == (1, 0):
-            self.route.add(0)
+            self.route.add(Direction.east)
         elif dir == (-1, 0): 
-            self.route.add(2)
+            self.route.add(Direction.west)
 
     def remove_last(self):
         return self.route.remove_last()
