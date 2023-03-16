@@ -3,7 +3,8 @@ import random
 from Maze import Maze
 from Ant import Ant
 from PathSpecification import PathSpecification
-
+from Route import Route
+from Direction import Direction 
 # Class representing the first assignment. Finds shortest path between two points in a maze according to a specific
 # path specification.
 class AntColonyOptimization:
@@ -88,16 +89,29 @@ class AntColonyOptimization:
                 ##updating pheromone
                 self.maze.add_pheromone_routes(ant.find_route(), self.q, self.evaporation)
                 #iteration -= 1
-            print("One generation is finished")   
-        for node in graph.nodes:
-            print(node, graph.nodes[node].neighbors)
-        return graph
+        # for node in graph.nodes:
+        #     print(node, graph.nodes[node].neighbors)
+        ## trace the path and add direction to route
+        start_coordinate = (path_specification.get_start().get_x(), path_specification.get_start().get_y())
+        end_coordinate = (path_specification.get_end().get_x(), path_specification.get_end().get_y())
+        shortest_route = Route(path_specification.get_start())
+        walk_node = start_coordinate
+        while walk_node != end_coordinate: 
+            neighbors = graph.nodes[walk_node].neighbors
+            #print(neighbors)
+            next_node = max(neighbors, key=lambda k: neighbors[k][1])
+            direction = self.convert_from_coordinates_to_direction(walk_node, next_node)
+            shortest_route.add(direction)
+            #print(walk_node, next_node)
+            walk_node = next_node
+        return shortest_route
     
     def initilizeAnts(self, path_specification):
         ants = []
         for i in range(self.ants_per_gen): 
             ants.append(Ant(self.maze, path_specification))
         return ants 
+    
     def move_back(self, start_coordinate, prev_step): 
         if prev_step == 0: 
             return (start_coordinate[0] - 1, start_coordinate[1])
@@ -107,3 +121,14 @@ class AntColonyOptimization:
             return (start_coordinate[0] + 1, start_coordinate[1])
         elif prev_step == 3:
             return (start_coordinate[0], start_coordinate[1] - 1)
+    
+    def convert_from_coordinates_to_direction(self, start_coordinate, end_coordinate):
+        (di,dj) = (end_coordinate[0] - start_coordinate[0], end_coordinate[1] - start_coordinate[1])
+        if (di, dj) == (0, 1):
+            return Direction(3)
+        elif (di, dj) == (1, 0):
+            return Direction(0)
+        elif (di, dj) == (0, -1):
+            return Direction(1)
+        elif (di, dj) == (-1, 0): 
+            return Direction(2)
