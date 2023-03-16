@@ -45,7 +45,10 @@ class Maze:
     # Update the pheromones along a certain route according to a certain Q
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
-    def add_pheromone_route(self, start_point, next_point, q):
+    def add_pheromone_route(self, start_point, next_point, q, length_of_route):
+        old_pheromone = self.graph.get_neighbors[next_point][1]
+        updated_pheromone = (1 - self.evaporate)*old_pheromone + q/length_of_route
+        self.graph.get_neighbors[next_point][1] = updated_pheromone
         return 
 
      # Update pheromones for a list of routes
@@ -63,7 +66,7 @@ class Maze:
                 next_point = (start_point[0] + 1, start_point[1])
             elif r == 1: 
                 next_point = (start_point[0] - 1, start_point[1])
-            self.add_pheromone_route(start_point, next_point, q)
+            self.add_pheromone_route(start_point, next_point, q, route.size())
             start_point = next_point 
 
     # Evaporate pheromone

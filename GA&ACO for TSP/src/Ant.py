@@ -22,14 +22,17 @@ class Ant:
     
     def add_route(self, dir):
         if dir == (0, 1):
-            self.route.add(0)
-        elif dir == (0, -1):
-            self.route.add(2)
-        elif dir == (1, 0):
             self.route.add(3)
-        elif dir == (-1, 0): 
+        elif dir == (0, -1):
             self.route.add(1)
+        elif dir == (1, 0):
+            self.route.add(0)
+        elif dir == (-1, 0): 
+            self.route.add(2)
+
+    def remove_last(self):
+        return self.route.remove_last()
     
     def length_route(self):
-        self.route.size()
+        return self.route.size()
 
