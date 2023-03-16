@@ -34,3 +34,13 @@ class SurroundingPheromone:
             return self.south
         else:
             return None
+
+    def set(self, dir, val):
+        if dir == Direction.north:
+            self.north = val
+        elif dir == Direction.east:
+            self.east = val
+        elif dir == Direction.west:
+            self.west = val
+        elif dir == Direction.south:
+            self.south = val
