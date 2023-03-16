@@ -2,6 +2,7 @@ import traceback
 import sys
 import SurroundingPheromone 
 import Coordinate
+import Route
 from Direction import Direction
 
 # Class that holds all the maze data. This means the pheromones, the open and blocked tiles in the system as
@@ -17,7 +18,8 @@ class Maze:
         self.length = length
         self.width = width
         self.start = None
-        self.end = None        
+        self.end = None
+        self.shortest_route = None        
         self.initialize_pheromones()
 
     # Initialize pheromones to a start value.
@@ -40,13 +42,23 @@ class Maze:
                 self.pheromones[pos] = pheromone
     
     # Reset the maze for a new shortest path problem.
-    def reset(self):
+    def reset(self, start, end):
+        self.start = start
+        self.end = end
+        self.shortest_route = Route(start)
+        # just to make the initial route super long
+        for i in range(0, (self.width + 1) * (self.length + 1)):
+            self.shortest_route.add(Direction.north)
         self.initialize_pheromones()
 
     # Update the pheromones along a certain route according to a certain Q
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
     def add_pheromone_route(self, route, q):
+        # Update new best route
+        if (route.shorter_than(self.shortest_route)):
+            self.shortest_route = route
+
         # Amount of pheromone to add on each edge
         delta = q / len(route.route)
         pos = route.start

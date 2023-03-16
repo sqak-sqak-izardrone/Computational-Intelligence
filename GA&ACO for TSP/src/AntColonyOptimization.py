@@ -23,5 +23,5 @@ class AntColonyOptimization:
      # @param spec Spefication of the route we wish to optimize
      # @return ACO optimized route
     def find_shortest_route(self, path_specification):
-        self.maze.reset()
-        return None
+        self.maze.reset(path_specification.start, path_specification.end)
+        return self.maze.shortest_route
