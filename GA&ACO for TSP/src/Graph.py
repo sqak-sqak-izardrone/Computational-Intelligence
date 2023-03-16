@@ -15,3 +15,8 @@ class Graph:
 
     def get_neighbors(self, coordinates):
         return self.nodes[coordinates].get_neighbors()
+    
+    def update_pheromone(self, start_point, next_point, new_pheromone): 
+        weight_pheromone = list(self.nodes[start_point].neighbors[next_point])
+        weight_pheromone[1] = new_pheromone
+        self.nodes[start_point].neighbors[next_point] = tuple(weight_pheromone)
