@@ -72,6 +72,7 @@ class Maze:
             elif r == Direction.north: 
                 next_point = (start_point[0], start_point[1] - 1)
             self.add_pheromone_route(start_point, next_point, q, route.size(), evaporation)
+            self.add_pheromone_route(next_point, start_point, q, route.size(), evaporation)
             start_point = next_point 
 
     # Evaporate pheromone
