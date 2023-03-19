@@ -37,6 +37,8 @@ For each iteration:
 
 * Ideas for optimization
 - Store probs so other ants can reuse 
+- evaporation becomes a variable where less condensed pheromones evaporates more
+- ants have longer visions and tends to walk straight in open areas
 
 5. Data structure:
 
