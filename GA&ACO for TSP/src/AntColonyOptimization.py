@@ -15,14 +15,16 @@ class AntColonyOptimization:
     # @param generations the amount of generations.
     # @param Q normalization factor for the amount of dropped pheromone
     # @param evaporation the evaporation factor.
-    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta):
+    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta, no_path_convergence, epsilon):
         self.maze = maze
         self.ants_per_gen = ants_per_gen
         self.generations = generations
         self.q = q
         self.evaporation = evaporation
+        self.no_path_convergence = no_path_convergence 
         self.alpha = alpha 
         self.beta = beta 
+        self.epsilon = epsilon 
 
      # Loop that starts the shortest path process
      # @param spec Spefication of the route we wish to optimize
@@ -30,10 +32,12 @@ class AntColonyOptimization:
     def find_shortest_route(self, path_specification: PathSpecification):
         self.maze.initialize_pheromones()
         graph = self.maze.get_graph()
-        shortest_route = None 
+        prev_shortest_route = None 
+        shortest_route = None  
+        counter = 0       
         for i in range(self.generations):
+            if counter == self.no_path_convergence: break
             ants = self.initilizeAnts(path_specification)
-           
             for ant in ants:
                 ##set-up before traverse the graph
                 start_coordinate = (path_specification.get_start().get_x(), path_specification.get_start().get_y())
@@ -43,7 +47,6 @@ class AntColonyOptimization:
                 for node in graph.nodes: 
                     if node != start_coordinate:
                         visited[node] = False
-
                 ## condition for stop: you can not walk anymore
                 while not visited[end_coordinate]:
                     neighbors = graph.get_neighbors(start_coordinate)
@@ -83,10 +86,17 @@ class AntColonyOptimization:
                 if shortest_route.size() > ant.find_route().size():
                     shortest_route = ant.find_route()
                 self.maze.add_pheromone_routes(ant.find_route(), self.q, self.evaporation)
-        for node in graph.nodes: 
-                print(node, graph.nodes[node].neighbors)    
-        ## trace the path and add direction to route
-        return shortest_route
+            
+            if prev_shortest_route is None: 
+                prev_shortest_route = shortest_route
+            else: 
+                if(prev_shortest_route.size() > shortest_route.size()):
+                    print(prev_shortest_route.size())
+                    prev_shortest_route = shortest_route
+                    print(shortest_route.size())
+                    counter += 1
+                    print(counter)
+        return prev_shortest_route
     
     def initilizeAnts(self, path_specification):
         ants = []
