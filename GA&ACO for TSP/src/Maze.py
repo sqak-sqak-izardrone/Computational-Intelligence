@@ -75,17 +75,18 @@ class Maze:
                             if (ni,nj) in self.graph.nodes and self.walls[i+x][j+y]==1:
                                 count+=1
                                 for e in self.graph.get_neighbors(tuple(i+x,j+y)):
-                                    if e.pheromone>1:
+                                    if e[1].pheromone>1:
                                         pheromone_density+=1
-                    if count>((2*filter_size+1)**2)*3/5:
+                    if count>((2*filter_size+1)**2)/2+1:
                         pheromone_density/=4*count
+                        print(pheromone_density)
                         for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
                             ni, nj = i+di, j+dj
                             if (ni,nj) in self.graph.nodes:
                                 adj_edges_list = self.graph.get_neighbors((i,j))
                                 edge_between = [n for n in adj_edges_list if n[0] == (ni,nj)]
                                 old_pheromone = edge_between[0][1][1]
-                                new_pheromone = old_pheromone*(1/(1+np.exp(-pheromone_density-1)))
+                                new_pheromone = old_pheromone*(1/(1+np.exp(-pheromone_density-1.5)))
                                 self.graph.update_pheromone((i,j),(ni,nj),new_pheromone)
                     else:                                               #usual evaporation in non open areas
                         for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
