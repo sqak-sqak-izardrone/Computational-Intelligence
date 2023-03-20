@@ -81,6 +81,7 @@ class AntColonyOptimization:
             
             shortest_route = ants[0].find_route()
             ##updating pheromone
+            self.maze.evaporate(self.evaporation)
             for ant in ants: 
                 if shortest_route.size() > ant.find_route().size():
                     shortest_route = ant.find_route()

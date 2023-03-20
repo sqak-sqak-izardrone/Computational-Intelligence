@@ -1,5 +1,6 @@
 import traceback
 import sys
+import numpy as np
 from Graph import Graph
 from Route import Route
 from Direction import Direction
@@ -46,20 +47,56 @@ class Maze:
     # Update the pheromones along a certain route according to a certain Q
     # @param r The route of the ants
     # @param Q Normalization factor for amount of dropped pheromone
-    def add_pheromone_route(self, start_point, next_point, q, length_of_route, evaporate):
+    def add_pheromone_route(self, start_point, next_point, q, length_of_route):
         adj_edges_list = self.graph.get_neighbors(start_point)
         edge_between = [n for n in adj_edges_list if n[0] == next_point]
         old_pheromone = edge_between[0][1][1] ##((x,y), (weight, pheromone))
         #print("old pheromone" + str(old_pheromone))
-        updated_pheromone = (1 - evaporate)*old_pheromone + q/length_of_route
+        updated_pheromone = old_pheromone + q/length_of_route
         #print("new pheromone" + str(updated_pheromone))
         self.graph.update_pheromone(start_point, next_point, updated_pheromone)
         return 
 
+    def evaporate(self,evaporation,filter_size=3):
+        for i in range(len(self.walls)):
+            for j in range(len(self.walls[0])):
+                if self.walls[i][j]==1:
+                    count=0
+                    pheromone_density=0
+                    for x in range(-filter_size,filter_size+1):
+                        for y in range(-filter_size,filter_size+1):
+                            ni,nj=i+x,j+y
+                            if (ni,nj) in self.graph.nodes and self.walls[i+x][j+y]==1:
+                                count+=1
+                                for e in self.graph.get_neighbors(tuple(i+x,j+y)):
+                                    if e.pheromone>1:
+                                        pheromone_density+=1
+                    if count>filter_size*filter_size*3/5:
+                        pheromone_density/=4*count
+                        for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
+                            ni, nj = i+di, j+dj
+                            if (ni,nj) in self.graph.nodes:
+                                adj_edges_list = self.graph.get_neighbors((i,j))
+                                edge_between = [n for n in adj_edges_list if n[0] == (ni,nj)]
+                                old_pheromone = edge_between[0][1][1]
+                                new_pheromone = old_pheromone*(1/(1+np.exp(-pheromone_density-1)))
+                                self.graph.update_pheromone((i,j),(ni,nj),new_pheromone)
+                    else:                                               #usual evaporation in non open areas
+                        for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
+                            ni, nj = i+di, j+dj
+                            if (ni,nj) in self.graph.nodes:
+                                adj_edges_list = self.graph.get_neighbors((i,j))
+                                edge_between = [n for n in adj_edges_list if n[0] == (ni,nj)]
+                                old_pheromone = edge_between[0][1][1]
+                                new_pheromone = old_pheromone*(1-evaporation)
+                                self.graph.update_pheromone((i,j),(ni,nj),new_pheromone)
+        return
+
      # Update pheromones for a list of routes
      # @param routes A list of routes
      # @param Q Normalization factor for amount of dropped pheromone
-    def add_pheromone_routes(self, route: Route, q, evaporation):
+    def add_pheromone_routes(self, route: Route, q):
+
         start_point = (route.get_start().get_x(), route.get_start().get_y())
         next_point = (0,0)
         for r in route.get_route():
@@ -71,8 +108,8 @@ class Maze:
                 next_point = (start_point[0], start_point[1] + 1)
             elif r == Direction.north: 
                 next_point = (start_point[0], start_point[1] - 1)
-            self.add_pheromone_route(start_point, next_point, q, route.size(), evaporation)
-            self.add_pheromone_route(next_point, start_point, q, route.size(), evaporation)
+            self.add_pheromone_route(start_point, next_point, q, route.size())
+            self.add_pheromone_route(next_point, start_point, q, route.size())
             start_point = next_point 
 
     # Evaporate pheromone
