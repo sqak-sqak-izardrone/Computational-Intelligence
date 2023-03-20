@@ -15,16 +15,15 @@ class AntColonyOptimization:
     # @param generations the amount of generations.
     # @param Q normalization factor for the amount of dropped pheromone
     # @param evaporation the evaporation factor.
-    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta, no_path_convergence, epsilon):
+    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta, iteration):
         self.maze = maze
         self.ants_per_gen = ants_per_gen
         self.generations = generations
         self.q = q
         self.evaporation = evaporation
-        self.no_path_convergence = no_path_convergence 
+        self.iteration = iteration
         self.alpha = alpha 
         self.beta = beta 
-        self.epsilon = epsilon 
 
      # Loop that starts the shortest path process
      # @param spec Spefication of the route we wish to optimize
