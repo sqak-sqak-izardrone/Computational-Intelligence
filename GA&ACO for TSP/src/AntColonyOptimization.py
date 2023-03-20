@@ -96,7 +96,7 @@ class AntColonyOptimization:
                     prev_shortest_route = shortest_route
                     counter += 1
             array.append(shortest_route.size())    
-        return prev_shortest_route, array
+        return prev_shortest_route
     
     def initilizeAnts(self, path_specification):
         ants = []
