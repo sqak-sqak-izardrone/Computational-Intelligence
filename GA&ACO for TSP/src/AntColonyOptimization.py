@@ -79,10 +79,11 @@ class AntColonyOptimization:
             
             shortest_route = ants[0].find_route()
             ##updating pheromone
+            self.maze.evaporate(self.evaporation)
             for ant in ants: 
                 if shortest_route.size() > ant.find_route().size():
                     shortest_route = ant.find_route()
-                self.maze.add_pheromone_routes(ant.find_route(), self.q, self.evaporation)
+                self.maze.add_pheromone_routes(ant.find_route(), self.q)
         for node in graph.nodes: 
                 print(node, graph.nodes[node].neighbors)    
         ## trace the path and add direction to route
