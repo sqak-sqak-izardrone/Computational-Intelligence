@@ -34,7 +34,7 @@ class Maze:
             for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
                 ni, nj = i+di, j+dj
                 if (ni,nj) in self.graph.nodes:
-                    self.graph.add_edge(node, (ni, nj), 1.0, 0.01) # Add an edge between adjacent nodes
+                    self.graph.add_edge(node, (ni, nj), 1.0, 1.0) # Add an edge between adjacent nodes
         return
 
     def get_graph(self):
@@ -52,12 +52,12 @@ class Maze:
         edge_between = [n for n in adj_edges_list if n[0] == next_point]
         old_pheromone = edge_between[0][1][1] ##((x,y), (weight, pheromone))
         #print("old pheromone" + str(old_pheromone))
-        updated_pheromone = old_pheromone + q/length_of_route
+        updated_pheromone = old_pheromone + q/(length_of_route**5)
         #print("new pheromone" + str(updated_pheromone))
         self.graph.update_pheromone(start_point, next_point, updated_pheromone)
         return 
 
-    def evaporate(self,evaporation,filter_size=3):
+    def evaporate(self,evaporation,filter_size=2):
         for i in range(len(self.walls)):
             for j in range(len(self.walls[0])):
                 if self.walls[i][j]==1:
@@ -71,7 +71,7 @@ class Maze:
                                 for e in self.graph.get_neighbors(tuple(i+x,j+y)):
                                     if e.pheromone>1:
                                         pheromone_density+=1
-                    if count>filter_size*filter_size*3/5:
+                    if count>((2*filter_size+1)**2)*3/5:
                         pheromone_density/=4*count
                         for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
                             ni, nj = i+di, j+dj

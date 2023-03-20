@@ -15,13 +15,12 @@ class AntColonyOptimization:
     # @param generations the amount of generations.
     # @param Q normalization factor for the amount of dropped pheromone
     # @param evaporation the evaporation factor.
-    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta, iteration):
+    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta):
         self.maze = maze
         self.ants_per_gen = ants_per_gen
         self.generations = generations
         self.q = q
         self.evaporation = evaporation
-        self.iteration = iteration
         self.alpha = alpha 
         self.beta = beta 
 
@@ -35,7 +34,6 @@ class AntColonyOptimization:
         shortest_route = None  
         counter = 0       
         for i in range(self.generations):
-            if counter == self.no_path_convergence: break
             ants = self.initilizeAnts(path_specification)
             for ant in ants:
                 ##set-up before traverse the graph
@@ -82,20 +80,19 @@ class AntColonyOptimization:
             shortest_route = ants[0].find_route()
             ##updating pheromone
             self.maze.evaporate(self.evaporation)
+            
             for ant in ants: 
                 if shortest_route.size() > ant.find_route().size():
                     shortest_route = ant.find_route()
-                self.maze.add_pheromone_routes(ant.find_route(), self.q, self.evaporation)
-            
+                self.maze.add_pheromone_routes(ant.find_route(), self.q)
+            print(shortest_route.size())
             if prev_shortest_route is None: 
                 prev_shortest_route = shortest_route
             else: 
                 if(prev_shortest_route.size() > shortest_route.size()):
-                    print(prev_shortest_route.size())
                     prev_shortest_route = shortest_route
-                    print(shortest_route.size())
                     counter += 1
-                    print(counter)
+                    
         return prev_shortest_route
     
     def initilizeAnts(self, path_specification):
