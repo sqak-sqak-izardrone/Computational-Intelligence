@@ -34,14 +34,20 @@ class Maze:
             for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
                 ni, nj = i+di, j+dj
                 if (ni,nj) in self.graph.nodes:
-                    self.graph.add_edge(node, (ni, nj), 1.0, 0.01) # Add an edge between adjacent nodes
+                    self.graph.add_edge(node, (ni, nj), 1.0, 1.0) # Add an edge between adjacent nodes
         return
 
     def get_graph(self):
         return self.graph
 
     # Reset the maze for a new shortest path problem.
-    def reset(self):
+    def reset(self, start, end):
+        self.start = start
+        self.end = end
+        self.shortest_route = Route(start)
+        # just to make the initial route super long
+        for i in range(0, (self.width + 1) * (self.length + 1)):
+            self.shortest_route.add(Direction.north)
         self.initialize_pheromones()
 
     # Update the pheromones along a certain route according to a certain Q
@@ -52,12 +58,12 @@ class Maze:
         edge_between = [n for n in adj_edges_list if n[0] == next_point]
         old_pheromone = edge_between[0][1][1] ##((x,y), (weight, pheromone))
         #print("old pheromone" + str(old_pheromone))
-        updated_pheromone = old_pheromone + q/length_of_route
+        updated_pheromone = old_pheromone + q/(length_of_route**2)
         #print("new pheromone" + str(updated_pheromone))
         self.graph.update_pheromone(start_point, next_point, updated_pheromone)
         return 
 
-    def evaporate(self,evaporation,filter_size=3):
+    def evaporate(self,evaporation,filter_size=2):
         for i in range(len(self.walls)):
             for j in range(len(self.walls[0])):
                 if self.walls[i][j]==1:
@@ -71,7 +77,7 @@ class Maze:
                                 for e in self.graph.get_neighbors(tuple(i+x,j+y)):
                                     if e.pheromone>1:
                                         pheromone_density+=1
-                    if count>filter_size*filter_size*3/5:
+                    if count>((2*filter_size+1)**2)*3/5:
                         pheromone_density/=4*count
                         for di, dj in [(0,1), (0,-1), (1,0), (-1,0)]: # Check adjacent cells
                             ni, nj = i+di, j+dj
@@ -91,6 +97,25 @@ class Maze:
                                 new_pheromone = old_pheromone*(1-evaporation)
                                 self.graph.update_pheromone((i,j),(ni,nj),new_pheromone)
         return
+
+        # Amount of pheromone to add on each edge
+        delta = q / len(route.route)
+        pos = route.start
+        for dir in route.route:
+            curVal = self.pheromones[pos].get(dir)
+            self.pheromones[pos].set(dir, curVal + delta)
+            if dir == Direction.north:
+                self.pheromones[Coordinate(pos.x, pos.y - 1)].set(Direction.south, curVal + delta)
+                pos = Coordinate(pos.x, pos.y - 1)
+            elif dir == Direction.east:
+                self.pheromones[Coordinate(pos.x + 1, pos.y)].set(Direction.west, curVal + delta)
+                pos = Coordinate(pos.x + 1, pos.y)
+            elif dir == Direction.west:
+                self.pheromones[Coordinate(pos.x - 1, pos.y)].set(Direction.east, curVal + delta)
+                pos = Coordinate(pos.x - 1, pos.y)
+            elif dir == Direction.south:
+                self.pheromones[Coordinate(pos.x, pos.y + 1)].set(Direction.south, curVal + delta)
+                pos = Coordinate(pos.x, pos.y + 1)
 
      # Update pheromones for a list of routes
      # @param routes A list of routes
@@ -131,13 +156,15 @@ class Maze:
     # @param position The position to check the neighbours of.
     # @return the pheromones of the neighbouring positions.
     def get_surrounding_pheromone(self, position):
-        return None
+        if self.inbound(position):
+            return self.pheromones[position]
 
     # Pheromone getter for a specific position. If the position is not in bounds returns 0
     # @param pos Position coordinate
     # @return pheromone at point
     def get_pheromone(self, pos):
-        return 0
+        if self.inbound(pos):
+            return self.pheromones[pos].get_total_surrounding_pheromone()
 
     # Check whether a coordinate lies in the current maze.
     # @param position The position to be checked
