@@ -28,6 +28,7 @@ class AntColonyOptimization:
      # @param spec Spefication of the route we wish to optimize
      # @return ACO optimized route
     def find_shortest_route(self, path_specification: PathSpecification):
+        array = []
         self.maze.initialize_pheromones()
         graph = self.maze.get_graph()
         prev_shortest_route = None 
@@ -76,7 +77,6 @@ class AntColonyOptimization:
                     res = (next_node[0] - start_coordinate[0], next_node[1] - start_coordinate[1])
                     ant.add_dir(res)
                     start_coordinate = next_node
-            
             shortest_route = ants[0].find_route()
             ##updating pheromone
             self.maze.evaporate(self.evaporation)
@@ -92,8 +92,8 @@ class AntColonyOptimization:
                 if(prev_shortest_route.size() > shortest_route.size()):
                     prev_shortest_route = shortest_route
                     counter += 1
-                    
-        return prev_shortest_route
+            array.append(shortest_route.size())    
+        return prev_shortest_route, array
     
     def initilizeAnts(self, path_specification):
         ants = []

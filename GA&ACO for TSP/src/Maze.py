@@ -52,7 +52,7 @@ class Maze:
         edge_between = [n for n in adj_edges_list if n[0] == next_point]
         old_pheromone = edge_between[0][1][1] ##((x,y), (weight, pheromone))
         #print("old pheromone" + str(old_pheromone))
-        updated_pheromone = old_pheromone + q/(length_of_route**5)
+        updated_pheromone = old_pheromone + q/(length_of_route**2)
         #print("new pheromone" + str(updated_pheromone))
         self.graph.update_pheromone(start_point, next_point, updated_pheromone)
         return 
