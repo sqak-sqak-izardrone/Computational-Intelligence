@@ -30,8 +30,7 @@ class AntColonyOptimization:
      # Loop that starts the shortest path process
      # @param spec Spefication of the route we wish to optimize
      # @return ACO optimized route
-    def find_shortest_route(self, path_specification: PathSpecification):
-        array = []
+    def find_shortest_route(self, path_specification: PathSpecification, prev_shortest_route_array):
         self.maze.initialize_pheromones()
         graph = self.maze.get_graph()
         prev_shortest_route = None 
@@ -90,11 +89,12 @@ class AntColonyOptimization:
                 self.maze.add_pheromone_routes(ant.find_route(), self.q)
             if prev_shortest_route is None: 
                 prev_shortest_route = shortest_route
+                prev_shortest_route_array.append(prev_shortest_route.size())
             else: 
                 if(prev_shortest_route.size() > shortest_route.size()):
                     prev_shortest_route = shortest_route
+                    prev_shortest_route_array.append(prev_shortest_route.size())
                     counter += 1
-            array.append(shortest_route.size())    
         return prev_shortest_route
     
     def initilizeAnts(self, path_specification):

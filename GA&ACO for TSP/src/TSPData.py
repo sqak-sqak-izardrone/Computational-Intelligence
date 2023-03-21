@@ -124,7 +124,7 @@ class TSPData:
             for j in range(number_of_product):
                 start = self.product_locations[i]
                 end = self.product_locations[j]
-                product_to_product[i].append(aco.find_shortest_route(PathSpecification(start, end)))
+                product_to_product[i].append(aco.find_shortest_route(PathSpecification(start, end), []))
         return product_to_product
 
 
