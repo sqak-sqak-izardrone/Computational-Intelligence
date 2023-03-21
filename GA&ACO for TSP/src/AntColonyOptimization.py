@@ -88,7 +88,6 @@ class AntColonyOptimization:
                 if shortest_route.size() > ant.find_route().size():
                     shortest_route = ant.find_route()
                 self.maze.add_pheromone_routes(ant.find_route(), self.q)
-            print(shortest_route.size())
             if prev_shortest_route is None: 
                 prev_shortest_route = shortest_route
             else: 
