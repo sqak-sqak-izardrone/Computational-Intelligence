@@ -15,7 +15,7 @@ class AntColonyOptimization:
     # @param generations the amount of generations.
     # @param Q normalization factor for the amount of dropped pheromone
     # @param evaporation the evaporation factor.
-    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta):
+    def __init__(self, maze: Maze, ants_per_gen, generations, q, evaporation, alpha, beta, convergence_criterion):
         self.maze = maze
         self.ants_per_gen = ants_per_gen
         self.generations = generations
@@ -23,10 +23,7 @@ class AntColonyOptimization:
         self.evaporation = evaporation
         self.alpha = alpha 
         self.beta = beta 
-
-
-
-
+        self.convergence_criterion = convergence_criterion 
      # Loop that starts the shortest path process
      # @param spec Spefication of the route we wish to optimize
      # @return ACO optimized route
@@ -37,6 +34,7 @@ class AntColonyOptimization:
         shortest_route = None  
         counter = 0       
         for i in range(self.generations):
+            if(self.convergence_criterion == counter): break
             ants = self.initilizeAnts(path_specification)
             for ant in ants:
                 ##set-up before traverse the graph
@@ -95,6 +93,8 @@ class AntColonyOptimization:
                     prev_shortest_route = shortest_route
                     prev_shortest_route_array.append(prev_shortest_route.size())
                     counter += 1
+                elif prev_shortest_route.size() < shortest_route.size():
+                    prev_shortest_route_array.append(prev_shortest_route.size())
         return prev_shortest_route
     
     def initilizeAnts(self, path_specification):
