@@ -34,4 +34,6 @@ class Agent:
         print(self.nr_of_actions_since_reset)
         self.x = self.start_x
         self.y = self.start_y
+        self.history=[]
+        self.history.append(State(self.start_x,self.start_y,1))
         self.nr_of_actions_since_reset = 0
