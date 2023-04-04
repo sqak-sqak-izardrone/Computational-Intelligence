@@ -1,3 +1,4 @@
+from Maze import Maze
 class Agent:
     def __init__(self, start_x, start_y):
         self.start_x = start_x
@@ -6,7 +7,7 @@ class Agent:
         self.y = start_y
         self.nr_of_actions_since_reset = 0
 
-    def get_state(self, maze):
+    def get_state(self, maze: Maze):
         return maze.get_state(self.x, self.y)
 
     def do_action(self, action, maze):
