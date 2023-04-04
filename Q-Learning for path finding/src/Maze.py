@@ -10,7 +10,8 @@ class Maze:
         down = Action("down")
         left = Action("left")
         right = Action("right")
-        self.actions = [up, down, left, right]
+        terminal=Action("terminal")
+        self.actions = [up, down, left, right,terminal]
         self.states = []
         # read in file
         try:
@@ -38,23 +39,28 @@ class Maze:
         print("Ready reading maze file " + file)
         self.rewards = {}
 
-    def is_walkable(self, state):
+    def is_walkable(self, state, agent):
         # the maze's way to check if you can walk on a particular state
         # you dont need to use this directly, use the method getValidActions()
-        return state.type == "1"
+        return state.type == "1" and (not state in agent.history)
 
-    def get_valid_actions(self, agent):
+    def get_valid_actions(self, agent, end_state):
         # use this method to retrieve the list of possible actions for an agent
         # the method checks if surrounding states are "walkable" and if the agent is not going out of the maze dimensions.
         # The method returns the list of actions
+
+        # if we are at the destination,we go to the terminal state
+        if agent.x==end_state.x and agent.y==end_state.y:
+            return [self.actions[4]]
+
         action_list = []
-        if agent.y > 0 and self.is_walkable(self.states[agent.y-1][agent.x]):
+        if agent.y > 0 and self.is_walkable(self.states[agent.y-1][agent.x],agent):
             action_list.append(self.actions[0])
-        if agent.y < len(self.states)-1 and self.is_walkable(self.states[agent.y + 1][agent.x]):
+        if agent.y < len(self.states)-1 and self.is_walkable(self.states[agent.y + 1][agent.x],agent):
             action_list.append(self.actions[1])
-        if agent.x > 0 and self.is_walkable(self.states[agent.y][agent.x - 1]):
+        if agent.x > 0 and self.is_walkable(self.states[agent.y][agent.x - 1],agent):
             action_list.append(self.actions[2])
-        if agent.x < len(self.states[agent.y]) - 1 and self.is_walkable(self.states[agent.y][agent.x + 1]):
+        if agent.x < len(self.states[agent.y]) - 1 and self.is_walkable(self.states[agent.y][agent.x + 1],agent):
             action_list.append(self.actions[3])
         return action_list
 
