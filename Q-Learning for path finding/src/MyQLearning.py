@@ -7,7 +7,8 @@ class MyQLearning(QLearning):
         if len(possible_actions)==0:
             Q_next_best=0
         else:
-            Q_next_best=np.amax(self.get_action_values(state_next,possible_actions))
+            Q_list=self.get_action_values(state_next,possible_actions)
+            Q_next_best=np.amax(Q_list)
         Q_new=Q_old+alfa*(r-penalty+gamma*Q_next_best-Q_old)
         self.set_q(state,action,Q_new)
         return
