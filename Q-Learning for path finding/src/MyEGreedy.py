@@ -24,7 +24,7 @@ class MyEGreedy:
 
     def get_egreedy_action(self, agent: Agent, maze: Maze, q_learning: QLearning, end_state, epsilon):
         # TODO to select between random or best action selection based on epsilon.
-        random_number = random.randint(0, 1)
+        random_number = random.uniform(0.0,1.0)
         if random_number >= 0 and random_number <= epsilon:
             return self.get_random_action(agent, maze,end_state)
         else:

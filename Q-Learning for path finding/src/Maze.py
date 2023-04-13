@@ -62,6 +62,8 @@ class Maze:
             action_list.append(self.actions[2])
         if agent.x < len(self.states[agent.y]) - 1 and self.is_walkable(self.states[agent.y][agent.x + 1],agent):
             action_list.append(self.actions[3])
+        if len(action_list)==0:
+            action_list.append(self.actions[4])
         return action_list
 
     def set_reward(self, state, reward):
@@ -80,4 +82,6 @@ class Maze:
     def get_state(self, x, y):
         # simply returns the state at the location the agent is at
         # use this to find the current state of the agent, or use Agent.getState(Maze m)
+        if x==-1 and y==-1:
+            return State(-1,-1,1)
         return self.states[y][x]
